@@ -11,10 +11,10 @@ if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_ADDR'] == '127.0.
     $user = 'root';
     $pass = ''; // Default XAMPP password is empty
 } else {
-    $host = 'sql210.infinityfree.com';
-    $db   = 'if0_42392561_db_sitaadz';
-    $user = 'if0_42392561';
-    $pass = 'DwIdTDHguUSVI4H';
+    $host = 'localhost';
+    $db   = 'qjnjmnoj_sitazt';
+    $user = 'qjnjmnoj_sitazt';
+    $pass = 'fNuEjXr7Q9LQCxNPnA88';
 }
 $charset = 'utf8mb4';
 
