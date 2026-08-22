@@ -90,9 +90,12 @@ function logActivity($pdo, $userId, $aktivitas)
         <!-- Sidebar Kiri -->
         <aside class="admin-sidebar" id="sidebar">
             <div class="admin-sidebar-header">
-                <img src="../assets/images/logo.jpg" alt="Logo MI Al-Adzkiya" class="admin-sidebar-logo">
-                <span class="admin-sidebar-title">MI AL-ADZKIYA</span>
-            </div>
+            <img src="../assets/images/logo.jpg" alt="Logo MI Al-Adzkiya" class="admin-sidebar-logo">
+            <span class="admin-sidebar-title">MI AL-ADZKIYA</span>
+            <button onclick="toggleSidebarDesktop()" class="sidebar-toggle-btn">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+        </div>
 
             <ul class="admin-sidebar-menu">
                 <li class="admin-menu-item <?php echo isActive('index.php', $current_page); ?>">
@@ -143,10 +146,10 @@ function logActivity($pdo, $userId, $aktivitas)
             </ul>
 
             <div class="admin-sidebar-footer">
-                <a href="../logout.php" class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center;">
-                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
-                </a>
-            </div>
+            <a href="../logout.php" class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center;">
+                <i class="fa-solid fa-right-from-bracket"></i> <span>Keluar</span>
+            </a>
+        </div>
         </aside>
 
         <!-- Main Content Area -->
@@ -189,26 +192,74 @@ function logActivity($pdo, $userId, $aktivitas)
                         ?>
                     </div>
                 </div>
-
+            
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="search-container" style="display: none;" id="topSearchContainer">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="tableSearch" class="search-input" placeholder="Cari data...">
+                </div>
                 <div class="admin-user-info">
-                    <div style="text-align: right; line-height: 1.2;">
+                    <div class="admin-user-details">
                         <div class="admin-user-name"><?php echo htmlspecialchars($nama_guru); ?></div>
                         <span class="admin-user-role">Guru Tahfidz</span>
                     </div>
                     <div class="user-avatar" style="width: 40px; height: 40px; font-size: 16px;">
-                        <i class="fa-solid fa-user-tie"></i>
+                        <i class="fa-solid fa-chalkboard-user"></i>
                     </div>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <!-- Area konten sesungguhnya -->
-            <main class="admin-content">
+        <!-- Navigasi Bawah Mobile -->
+        <nav class="mobile-bottom-nav">
+            <a href="index.php" class="nav-item <?php echo isActive('index.php', $current_page); ?>">
+                <i class="fa-solid fa-house"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="setoran.php" class="nav-item <?php echo isActive('setoran.php', $current_page); ?>">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Setoran</span>
+            </a>
+            <a href="progres.php" class="nav-item <?php echo isActive('progres.php', $current_page); ?>">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Progres</span>
+            </a>
+            <a href="target.php" class="nav-item <?php echo isActive('target.php', $current_page); ?>">
+                <i class="fa-solid fa-bullseye"></i>
+                <span>Target</span>
+            </a>
+            <a href="javascript:void(0)" class="nav-item" onclick="toggleSidebar()">
+                <i class="fa-solid fa-ellipsis"></i>
+                <span>Menu</span>
+            </a>
+        </nav>
 
-                <script>
-                    function toggleSidebar() {
-                        document.getElementById('sidebar').classList.toggle('show');
-                    }
-                    if (window.innerWidth <= 768) {
-                        document.querySelector('.mobile-toggle-btn').style.display = 'block';
-                    }
-                </script>
+        <!-- Area konten sesungguhnya -->
+        <main class="admin-content animate-on-load">
+
+            <script>
+            function toggleSidebar() {
+                // For mobile
+                document.getElementById('sidebar').classList.toggle('show');
+            }
+            
+            function toggleSidebarDesktop() {
+                // For desktop
+                document.getElementById('sidebar').classList.toggle('collapsed');
+            }
+            
+            // Tampilkan tombol hamburger jika layar kecil
+            if (window.innerWidth <= 768) {
+                document.querySelector('.mobile-toggle-btn').style.display = 'block';
+                // Hide desktop toggle button on mobile
+                document.querySelector('.sidebar-toggle-btn').style.display = 'none';
+            }
+
+            // Tampilkan kotak pencarian hanya jika ada tabel di halaman
+            document.addEventListener('DOMContentLoaded', function() {
+                if (document.querySelector('.table-admin')) {
+                    document.getElementById('topSearchContainer').style.display = 'block';
+                }
+            });
+            </script>
+            <script src="../assets/js/app.js"></script>
