@@ -101,7 +101,7 @@ function isActive($pageName, $current_page) {
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/style.css?v=1.5">
+    <link rel="stylesheet" href="../assets/css/style.css?v=2.1">
 </head>
 <body class="admin-body">
 
