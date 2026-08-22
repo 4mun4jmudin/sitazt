@@ -246,6 +246,9 @@ try {
         <i class="fa-solid fa-circle-check"></i>
         <div><?php echo htmlspecialchars($success); ?></div>
     </div>
+    <script>
+        alert("Pemberitahuan: <?php echo htmlspecialchars($success); ?>");
+    </script>
 <?php endif; ?>
 
 <!-- Tabel Data -->
@@ -321,10 +324,19 @@ try {
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div class="action-buttons">
-                                    <button onclick="showEditModal(<?php echo $siswa['id']; ?>, '<?php echo htmlspecialchars($siswa['nisn']); ?>', '<?php echo htmlspecialchars($siswa['nama_lengkap']); ?>', '<?php echo htmlspecialchars($siswa['ttl'] ?? ''); ?>', '<?php echo htmlspecialchars($siswa['jenis_kelamin'] ?? ''); ?>', '<?php echo $siswa['kelas_id']; ?>', '<?php echo $siswa['orang_tua_id']; ?>', '<?php echo $siswa['status_aktif']; ?>')" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                                    </button>
+                                 <div class="action-buttons">
+                                     <button class="btn btn-secondary btn-sm btn-edit-siswa" 
+                                             style="padding: 4px 8px; font-size: 11px;"
+                                             data-id="<?php echo $siswa['id']; ?>"
+                                             data-nisn="<?php echo htmlspecialchars($siswa['nisn'], ENT_QUOTES); ?>"
+                                             data-nama="<?php echo htmlspecialchars($siswa['nama_lengkap'], ENT_QUOTES); ?>"
+                                             data-ttl="<?php echo htmlspecialchars($siswa['ttl'] ?? '', ENT_QUOTES); ?>"
+                                             data-jenis-kelamin="<?php echo htmlspecialchars($siswa['jenis_kelamin'] ?? '', ENT_QUOTES); ?>"
+                                             data-kelas-id="<?php echo htmlspecialchars($siswa['kelas_id'] ?? '', ENT_QUOTES); ?>"
+                                             data-orang-tua-id="<?php echo htmlspecialchars($siswa['orang_tua_id'] ?? '', ENT_QUOTES); ?>"
+                                             data-status="<?php echo htmlspecialchars($siswa['status_aktif'], ENT_QUOTES); ?>">
+                                         <i class="fa-solid fa-pen-to-square"></i> Edit
+                                     </button>
                                     
                                     <form action="siswa.php" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data siswa ini?');">
                                         <input type="hidden" name="action" value="delete">
@@ -502,15 +514,29 @@ function showEditModal(id, nisn, nama, ttl, jenis_kelamin, kelas_id, ortu_id, st
     document.getElementById('edit_nisn').value = nisn;
     document.getElementById('edit_nama').value = nama;
     
-    // Parse TTL (format: Tempat, YYYY-MM-DD atau sejenisnya)
+    // Parse & Normalize TTL (format: Tempat, YYYY-MM-DD or DD-MM-YYYY)
     let tempat = '';
     let tanggal = '';
     if (ttl && ttl.includes(',')) {
         let parts = ttl.split(',');
         tempat = parts[0].trim();
-        tanggal = parts[1].trim();
+        let datePart = parts[1].trim();
+        if (datePart.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            tanggal = datePart;
+        } else if (datePart.match(/^\d{2}-\d{2}-\d{4}$/)) { // DD-MM-YYYY
+            let dp = datePart.split('-');
+            tanggal = `${dp[2]}-${dp[1]}-${dp[0]}`;
+        } else if (datePart.match(/^\d{2}\/\d{2}\/\d{4}$/)) { // DD/MM/YYYY
+            let dp = datePart.split('/');
+            tanggal = `${dp[2]}-${dp[1]}-${dp[0]}`;
+        } else {
+            tanggal = datePart;
+        }
     } else if (ttl && ttl.match(/^\d{4}-\d{2}-\d{2}$/)) {
         tanggal = ttl.trim();
+    } else if (ttl && ttl.match(/^\d{2}-\d{2}-\d{4}$/)) {
+        let dp = ttl.trim().split('-');
+        tanggal = `${dp[2]}-${dp[1]}-${dp[0]}`;
     } else {
         tempat = ttl ? ttl.trim() : '';
     }
@@ -526,6 +552,129 @@ function showEditModal(id, nisn, nama, ttl, jenis_kelamin, kelas_id, ortu_id, st
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('show');
 }
+
+// Delegasi event listener untuk menangani klik Edit secara aman
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-edit-siswa');
+    if (btn) {
+        const id = btn.getAttribute('data-id');
+        const nisn = btn.getAttribute('data-nisn');
+        const nama = btn.getAttribute('data-nama');
+        const ttl = btn.getAttribute('data-ttl');
+        const jenisKelamin = btn.getAttribute('data-jenis-kelamin');
+        const kelasId = btn.getAttribute('data-kelas-id');
+        const orangTuaId = btn.getAttribute('data-orang-tua-id');
+        const status = btn.getAttribute('data-status');
+        
+        showEditModal(id, nisn, nama, ttl, jenisKelamin, kelasId, orangTuaId, status);
+    }
+});
+
+function initDropdownDatePicker(input, minYear, maxYear) {
+    if (!input) return;
+    
+    // Create dropdowns container
+    const container = document.createElement('div');
+    container.className = 'date-dropdown-group';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = '1fr 1.3fr 1fr';
+    container.style.gap = '8px';
+    container.style.marginTop = '4px';
+    
+    // Create selects
+    const selectDay = document.createElement('select');
+    selectDay.className = 'form-control form-control-select';
+    selectDay.style.padding = '8px';
+    selectDay.innerHTML = '<option value="">Hari</option>';
+    for (let d = 1; d <= 31; d++) {
+        const val = String(d).padStart(2, '0');
+        selectDay.innerHTML += `<option value="${val}">${d}</option>`;
+    }
+    
+    const selectMonth = document.createElement('select');
+    selectMonth.className = 'form-control form-control-select';
+    selectMonth.style.padding = '8px';
+    selectMonth.innerHTML = '<option value="">Bulan</option>';
+    const months = [
+        {val: '01', name: 'Januari'}, {val: '02', name: 'Februari'}, {val: '03', name: 'Maret'},
+        {val: '04', name: 'April'}, {val: '05', name: 'Mei'}, {val: '06', name: 'Juni'},
+        {val: '07', name: 'Juli'}, {val: '08', name: 'Agustus'}, {val: '09', name: 'September'},
+        {val: '10', name: 'Oktober'}, {val: '11', name: 'November'}, {val: '12', name: 'Desember'}
+    ];
+    months.forEach(m => {
+        selectMonth.innerHTML += `<option value="${m.val}">${m.name}</option>`;
+    });
+    
+    const selectYear = document.createElement('select');
+    selectYear.className = 'form-control form-control-select';
+    selectYear.style.padding = '8px';
+    selectYear.innerHTML = '<option value="">Tahun</option>';
+    for (let y = maxYear; y >= minYear; y--) {
+        selectYear.innerHTML += `<option value="${y}">${y}</option>`;
+    }
+    
+    container.appendChild(selectDay);
+    container.appendChild(selectMonth);
+    container.appendChild(selectYear);
+    
+    // Insert container after input
+    input.parentNode.insertBefore(container, input.nextSibling);
+    // Hide the original date input
+    input.type = 'hidden';
+    
+    // Update original input value from dropdowns
+    function updateInputValue() {
+        const d = selectDay.value;
+        const m = selectMonth.value;
+        const y = selectYear.value;
+        if (d && m && y) {
+            input.value = `${y}-${m}-${d}`;
+        } else {
+            input.value = '';
+        }
+        // Trigger change event on input
+        const event = new Event('change', { bubbles: true });
+        input.dispatchEvent(event);
+    }
+    
+    selectDay.addEventListener('change', updateInputValue);
+    selectMonth.addEventListener('change', updateInputValue);
+    selectYear.addEventListener('change', updateInputValue);
+    
+    // Parse value YYYY-MM-DD and set dropdowns
+    function setDropdownsFromValue(val) {
+        if (val && val.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            const parts = val.split('-');
+            selectYear.value = parts[0];
+            selectMonth.value = parts[1];
+            selectDay.value = parts[2];
+        } else {
+            selectYear.value = '';
+            selectMonth.value = '';
+            selectDay.value = '';
+        }
+    }
+    
+    // Initial set
+    setDropdownsFromValue(input.value);
+    
+    // Intercept programmatical value assignment
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    Object.defineProperty(input, 'value', {
+        get: function() {
+            return descriptor.get.call(this);
+        },
+        set: function(val) {
+            descriptor.set.call(this, val);
+            setDropdownsFromValue(val);
+        }
+    });
+}
+
+// Instantiate for student birth dates
+const currentYear = new Date().getFullYear();
+initDropdownDatePicker(document.getElementById('tanggal_lahir'), currentYear - 25, currentYear);
+initDropdownDatePicker(document.getElementById('edit_tanggal_lahir'), currentYear - 25, currentYear);
 </script>
 
 </main>

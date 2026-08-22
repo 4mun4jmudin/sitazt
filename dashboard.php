@@ -56,7 +56,7 @@ switch ($role) {
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/style.css?v=1.5">
 </head>
 <body style="align-items: flex-start; padding: 40px 0;">
 

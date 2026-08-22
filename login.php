@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Font Awesome CDN for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/style.css?v=1.5">
 </head>
 
 <body>
@@ -105,8 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="form-actions">
                     <label class="checkbox-container">
-                        <input type="checkbox" name="remember">
-                        <span>Ingat Saya</span>
+                        <input type="checkbox" id="show-password">
+                        <span>Tampilkan sandi</span>
                     </label>
                     <a href="forgot-password.php" class="forgot-link">Lupa Kata Sandi?</a>
                 </div>
@@ -122,6 +122,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p>&copy; <?php echo date('Y'); ?> MI Al-Adzkiya. All Rights Reserved.</p>
         </div>
     </div>
+
+    <script>
+        document.getElementById('show-password').addEventListener('change', function() {
+            const passwordField = document.getElementById('password');
+            if (this.checked) {
+                passwordField.type = 'text';
+            } else {
+                passwordField.type = 'password';
+            }
+        });
+    </script>
 
 </body>
 

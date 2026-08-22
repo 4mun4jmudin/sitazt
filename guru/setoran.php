@@ -13,6 +13,48 @@ try {
     // Abaikan jika sudah ada
 }
 
+// Migrasi DB: Ubah kolom nilai menjadi VARCHAR(50) untuk menampung predikat deskriptif
+try {
+    $pdo->exec("ALTER TABLE setoran_tahfidz MODIFY COLUMN nilai VARCHAR(50) NOT NULL");
+} catch (\PDOException $e) {
+    // Abaikan jika sudah diubah
+}
+
+// Migrasi DB: Migrasikan nilai huruf lama ke predikat baru jika ada
+try {
+    $stmt_check_old = $pdo->query("SELECT COUNT(*) FROM setoran_tahfidz WHERE nilai IN ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'D', 'Mumtaz', 'Jayyid Jiddan', 'Jayyid', 'Maqbul', 'Dhaif')");
+    if ($stmt_check_old && $stmt_check_old->fetchColumn() > 0) {
+        $pdo->exec("UPDATE setoran_tahfidz SET nilai = 'Sangat Lancar' WHERE nilai IN ('A+', 'A', 'A-', 'Mumtaz')");
+        $pdo->exec("UPDATE setoran_tahfidz SET nilai = 'Lancar Terbata-Bata' WHERE nilai IN ('B+', 'B', 'B-', 'Jayyid Jiddan', 'Jayyid')");
+        $pdo->exec("UPDATE setoran_tahfidz SET nilai = 'Lancar dengan Bantuan' WHERE nilai IN ('C+', 'C', 'Maqbul')");
+        $pdo->exec("UPDATE setoran_tahfidz SET nilai = 'Tidak Lancar / Ulangi' WHERE nilai IN ('D', 'Dhaif')");
+    }
+} catch (\PDOException $e) {
+    // Abaikan jika gagal
+}
+
+// Migrasi DB: Set tahun ajaran aktif menjadi 2026/2027 Ganjil agar cocok dengan data mock (Juli 2026)
+try {
+    $stmt_check_ta = $pdo->prepare("SELECT id FROM tahun_ajaran WHERE tahun = '2026/2027' AND semester = 'Ganjil'");
+    $stmt_check_ta->execute();
+    $ta_id = $stmt_check_ta->fetchColumn();
+    
+    if (!$ta_id) {
+        $stmt_insert_ta = $pdo->prepare("INSERT INTO tahun_ajaran (tahun, semester, status) VALUES ('2026/2027', 'Ganjil', 'tidak_aktif')");
+        $stmt_insert_ta->execute();
+        $ta_id = $pdo->lastInsertId();
+    }
+    
+    $stmt_active_now = $pdo->query("SELECT id FROM tahun_ajaran WHERE status = 'aktif' AND tahun = '2025/2026'");
+    if ($stmt_active_now && $stmt_active_now->fetch()) {
+        $pdo->query("UPDATE tahun_ajaran SET status = 'tidak_aktif'");
+        $stmt_set_active = $pdo->prepare("UPDATE tahun_ajaran SET status = 'aktif' WHERE id = :id");
+        $stmt_set_active->execute(['id' => $ta_id]);
+    }
+} catch (\PDOException $e) {
+    // Abaikan jika gagal
+}
+
 // Array 114 Surah Al-Qur'an
 $quran_surahs = [
     "Al-Fatihah", "Al-Baqarah", "Ali 'Imran", "An-Nisa'", "Al-Ma'idah", "Al-An'am", "Al-A'raf", "Al-Anfal", "At-Taubah", "Yunus",
@@ -65,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_setoran'])) {
     $surah = $_POST['surah'] ?? '';
     $ayat_mulai = intval($_POST['ayat_mulai'] ?? 1);
     $ayat_selesai = intval($_POST['ayat_selesai'] ?? 1);
-    $nilai = trim($_POST['nilai'] ?? 'A');
+    $nilai = trim($_POST['nilai'] ?? 'Sangat Lancar');
     $nilai_angka = isset($_POST['nilai_angka']) ? intval($_POST['nilai_angka']) : null;
     $catatan = trim($_POST['catatan'] ?? '');
     
@@ -234,7 +276,7 @@ try {
                     </div>
                     <div>
                         <label class="form-label" for="tanggal">Tanggal</label>
-                        <input type="date" name="tanggal" class="form-control" style="padding-left: 16px;" value="<?php echo date('Y-m-d'); ?>" required>
+                        <input type="date" id="tanggal" name="tanggal" class="form-control" style="padding-left: 16px;" value="<?php echo date('Y-m-d'); ?>" required>
                     </div>
                 </div>
                 
@@ -264,13 +306,21 @@ try {
                 <div class="form-group" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 20px;">
                     <div>
                         <label class="form-label" for="nilai_angka">Skor Angka (0-100)</label>
-                        <input type="number" id="nilai_angka_input" name="nilai_angka" class="form-control" style="padding-left: 16px;" min="0" max="100" placeholder="Skor: 0-100" oninput="updateCalculatedGrade()" required>
+                        <input type="number" id="nilai_angka_input" name="nilai_angka" class="form-control" style="padding-left: 16px;" min="0" max="100" placeholder="Skor: 0-100" oninput="updateCalculatedGrade(false)" required>
                     </div>
                     <div>
-                        <label class="form-label" for="nilai_display">Predikat Kelancaran</label>
-                        <input type="text" id="nilai_display" class="form-control" style="padding-left: 16px; font-weight: bold; background-color: #f1f5f9; color: var(--primary-color);" readonly placeholder="-">
-                        <input type="hidden" name="nilai" id="nilai_letter_input">
+                        <label class="form-label" for="nilai_select">Predikat Kelancaran</label>
+                        <select name="nilai" id="nilai_select" class="form-control form-control-select" style="padding-left: 16px; font-weight: bold; color: var(--primary-color);" onchange="updateCalculatedGrade(true)" required>
+                            <option value="Sangat Lancar">Sangat Lancar</option>
+                            <option value="Lancar Terbata-Bata">Lancar Terbata-Bata</option>
+                            <option value="Lancar dengan Bantuan">Lancar dengan Bantuan</option>
+                            <option value="Tidak Lancar / Ulangi">Tidak Lancar / Ulangi</option>
+                        </select>
                     </div>
+                </div>
+                
+                <div id="grade_detail_display" style="margin-top: -15px; margin-bottom: 20px; font-size: 13px; font-weight: bold; color: var(--primary-color);">
+                    Detail Predikat: -
                 </div>
                 
                 <div class="form-group">
@@ -343,53 +393,63 @@ try {
 </style>
 
 <script>
-// Filter Siswa berdasarkan Kelas
-function filterSiswaByKelas(kelasId) {
+// Simpan backup data option siswa ketika pertama kali dimuat
+let allSiswaOptions = [];
+
+document.addEventListener("DOMContentLoaded", function() {
     var select = document.getElementById('siswa_select');
-    var options = select.options;
-    var searchInput = document.getElementById('search_siswa_input');
-    searchInput.value = ''; // Reset keyword pencarian
-    
-    for (var i = 0; i < options.length; i++) {
-        var opt = options[i];
-        if (opt.value === "") {
-            opt.style.display = "";
-            continue;
-        }
-        var optKelas = opt.getAttribute('data-kelas');
-        if (kelasId === "" || optKelas === kelasId) {
-            opt.style.display = "";
-        } else {
-            opt.style.display = "none";
+    if (select) {
+        var options = select.options;
+        for (var i = 0; i < options.length; i++) {
+            var opt = options[i];
+            if (opt.value !== "") {
+                allSiswaOptions.push({
+                    value: opt.value,
+                    text: opt.text,
+                    kelas: opt.getAttribute('data-kelas'),
+                    selected: opt.selected
+                });
+            }
         }
     }
-    select.value = ""; // Reset pilihan siswa
+    filterSiswaSearch();
+});
+
+function filterSiswaByKelas(kelasId) {
+    document.getElementById('search_siswa_input').value = ''; // Reset keyword pencarian
+    filterSiswaSearch();
+    var select = document.getElementById('siswa_select');
+    if (select) select.value = ""; // Reset pilihan siswa
 }
 
-// Cari Siswa secara instan
 function filterSiswaSearch() {
     var searchVal = document.getElementById('search_siswa_input').value.toLowerCase();
     var kelasId = document.getElementById('select_kelas').value;
     var select = document.getElementById('siswa_select');
-    var options = select.options;
     
-    for (var i = 0; i < options.length; i++) {
-        var opt = options[i];
-        if (opt.value === "") {
-            opt.style.display = "";
-            continue;
-        }
-        
-        var optKelas = opt.getAttribute('data-kelas');
-        var name = opt.text.toLowerCase();
-        
-        var matchesKelas = (kelasId === "" || optKelas === kelasId);
-        var matchesSearch = name.includes(searchVal);
+    if (!select) return;
+    
+    // Simpan nilai terpilih sebelumnya
+    var prevSelectedVal = select.value;
+    
+    // Bersihkan select
+    select.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+    
+    // Filter dan tambah opsi yang cocok
+    for (var i = 0; i < allSiswaOptions.length; i++) {
+        var optData = allSiswaOptions[i];
+        var matchesKelas = (kelasId === "" || optData.kelas === kelasId);
+        var matchesSearch = optData.text.toLowerCase().includes(searchVal);
         
         if (matchesKelas && matchesSearch) {
-            opt.style.display = "";
-        } else {
-            opt.style.display = "none";
+            var opt = document.createElement('option');
+            opt.value = optData.value;
+            opt.text = optData.text;
+            opt.setAttribute('data-kelas', optData.kelas);
+            if (optData.value === prevSelectedVal) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
         }
     }
 }
@@ -486,49 +546,64 @@ function displayVerses() {
 }
 
 // Kalkulasi Predikat Kelancaran berdasarkan Skor Angka
-function updateCalculatedGrade() {
+function updateCalculatedGrade(isManualPredicateChange = false) {
     const scoreInput = document.getElementById('nilai_angka_input');
     const score = parseInt(scoreInput.value);
-    const letterInput = document.getElementById('nilai_letter_input');
-    const displayInput = document.getElementById('nilai_display');
+    const selectElement = document.getElementById('nilai_select');
+    const detailDisplay = document.getElementById('grade_detail_display');
     
     if (isNaN(score) || scoreInput.value === "") {
-        letterInput.value = '';
-        displayInput.value = '';
+        detailDisplay.innerText = 'Detail Predikat: -';
         return;
     }
     
-    let letter = '';
-    let text = '';
+    let predikat = selectElement.value;
     
-    if (score >= 90) {
-        letter = 'A+';
-        text = 'Sangat Lancar';
-    } else if (score >= 85) {
-        letter = 'A';
-        text = 'Lancar Terbata-bata';
-    } else if (score >= 80) {
-        letter = 'A-';
-        text = 'Cukup Lancar';
-    } else if (score >= 75) {
-        letter = 'B+';
-        text = 'Lancar Dengan Sedikit Bantuan';
-    } else if (score >= 70) {
-        letter = 'B';
-        text = 'Lancar Dengan Bantuan';
-    } else if (score >= 65) {
-        letter = 'B-';
-        text = 'Lancar Dengan Banyak Bantuan';
-    } else if (score >= 60) {
-        letter = 'C';
-        text = 'Tidak Lancar';
-    } else {
-        letter = 'C-';
-        text = 'Ulangi';
+    // 1. Auto-select predikat berdasarkan nilai angka jika bukan perubahan manual
+    if (!isManualPredicateChange) {
+        if (score >= 85) {
+            predikat = 'Sangat Lancar';
+        } else if (score >= 70) {
+            predikat = 'Lancar Terbata-Bata';
+        } else if (score >= 60) {
+            predikat = 'Lancar dengan Bantuan';
+        } else {
+            predikat = 'Tidak Lancar / Ulangi';
+        }
+        selectElement.value = predikat;
     }
     
-    letterInput.value = letter;
-    displayInput.value = `${letter} (${text})`;
+    // 2. Tentukan detail huruf grade berdasarkan kombinasi predikat dan skor
+    let text = '';
+    if (predikat === 'Sangat Lancar') {
+        if (score >= 95) {
+            text = 'A+';
+        } else if (score >= 90) {
+            text = 'A';
+        } else {
+            text = 'A-';
+        }
+    } else if (predikat === 'Lancar Terbata-Bata') {
+        if (score >= 80) {
+            text = 'B+';
+        } else if (score >= 75) {
+            text = 'B';
+        } else {
+            text = 'B-';
+        }
+    } else if (predikat === 'Lancar dengan Bantuan') {
+        if (score >= 70) {
+            text = 'C+';
+        } else if (score >= 65) {
+            text = 'C';
+        } else {
+            text = 'C-';
+        }
+    } else {
+        text = 'D';
+    }
+    
+    detailDisplay.innerText = `Detail Predikat: ${predikat} (${text})`;
 }
 
 // Hubungkan input ayat dengan preview loader
@@ -539,5 +614,111 @@ document.getElementById('ayat_selesai_input').addEventListener('input', displayV
 </main>
 </div>
 </div>
+<script>
+function initDropdownDatePicker(input, minYear, maxYear) {
+    if (!input) return;
+    
+    // Create dropdowns container
+    const container = document.createElement('div');
+    container.className = 'date-dropdown-group';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = '1fr 1.3fr 1fr';
+    container.style.gap = '8px';
+    container.style.marginTop = '4px';
+    
+    // Create selects
+    const selectDay = document.createElement('select');
+    selectDay.className = 'form-control form-control-select';
+    selectDay.style.padding = '8px';
+    selectDay.innerHTML = '<option value="">Hari</option>';
+    for (let d = 1; d <= 31; d++) {
+        const val = String(d).padStart(2, '0');
+        selectDay.innerHTML += `<option value="${val}">${d}</option>`;
+    }
+    
+    const selectMonth = document.createElement('select');
+    selectMonth.className = 'form-control form-control-select';
+    selectMonth.style.padding = '8px';
+    selectMonth.innerHTML = '<option value="">Bulan</option>';
+    const months = [
+        {val: '01', name: 'Januari'}, {val: '02', name: 'Februari'}, {val: '03', name: 'Maret'},
+        {val: '04', name: 'April'}, {val: '05', name: 'Mei'}, {val: '06', name: 'Juni'},
+        {val: '07', name: 'Juli'}, {val: '08', name: 'Agustus'}, {val: '09', name: 'September'},
+        {val: '10', name: 'Oktober'}, {val: '11', name: 'November'}, {val: '12', name: 'Desember'}
+    ];
+    months.forEach(m => {
+        selectMonth.innerHTML += `<option value="${m.val}">${m.name}</option>`;
+    });
+    
+    const selectYear = document.createElement('select');
+    selectYear.className = 'form-control form-control-select';
+    selectYear.style.padding = '8px';
+    selectYear.innerHTML = '<option value="">Tahun</option>';
+    for (let y = maxYear; y >= minYear; y--) {
+        selectYear.innerHTML += `<option value="${y}">${y}</option>`;
+    }
+    
+    container.appendChild(selectDay);
+    container.appendChild(selectMonth);
+    container.appendChild(selectYear);
+    
+    // Insert container after input
+    input.parentNode.insertBefore(container, input.nextSibling);
+    // Hide the original date input
+    input.type = 'hidden';
+    
+    // Update original input value from dropdowns
+    function updateInputValue() {
+        const d = selectDay.value;
+        const m = selectMonth.value;
+        const y = selectYear.value;
+        if (d && m && y) {
+            input.value = `${y}-${m}-${d}`;
+        } else {
+            input.value = '';
+        }
+        // Trigger change event on input
+        const event = new Event('change', { bubbles: true });
+        input.dispatchEvent(event);
+    }
+    
+    selectDay.addEventListener('change', updateInputValue);
+    selectMonth.addEventListener('change', updateInputValue);
+    selectYear.addEventListener('change', updateInputValue);
+    
+    // Parse value YYYY-MM-DD and set dropdowns
+    function setDropdownsFromValue(val) {
+        if (val && val.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            const parts = val.split('-');
+            selectYear.value = parts[0];
+            selectMonth.value = parts[1];
+            selectDay.value = parts[2];
+        } else {
+            selectYear.value = '';
+            selectMonth.value = '';
+            selectDay.value = '';
+        }
+    }
+    
+    // Initial set
+    setDropdownsFromValue(input.value);
+    
+    // Intercept programmatical value assignment
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    Object.defineProperty(input, 'value', {
+        get: function() {
+            return descriptor.get.call(this);
+        },
+        set: function(val) {
+            descriptor.set.call(this, val);
+            setDropdownsFromValue(val);
+        }
+    });
+}
+
+// Instantiate for tanggal input
+const currentYear = new Date().getFullYear();
+initDropdownDatePicker(document.getElementById('tanggal'), currentYear - 2, currentYear + 2);
+</script>
 </body>
 </html>

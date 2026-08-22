@@ -16,7 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $no_hp = trim($_POST['no_hp'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $username = trim($_POST['username'] ?? '');
-        $password = $_POST['password'] ?? 'password123';
+        $password = trim($_POST['password'] ?? '');
+        if ($password === '') {
+            $password = 'password123';
+        }
         
         if ($nama_lengkap === '' || $username === '') {
             $error = 'Nama Lengkap dan Nama Pengguna wajib diisi.';
@@ -250,6 +253,9 @@ try {
         <i class="fa-solid fa-circle-check"></i>
         <div><?php echo htmlspecialchars($success); ?></div>
     </div>
+    <script>
+        alert("Pemberitahuan: <?php echo htmlspecialchars($success); ?>");
+    </script>
 <?php endif; ?>
 
 <!-- Tabel Data -->
@@ -297,7 +303,14 @@ try {
                             <td><span style="font-family: monospace; background-color: #f1f5f9; padding: 2px 6px; border-radius: 4px;"><?php echo htmlspecialchars($guru['username']); ?></span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button onclick="showEditModal(<?php echo $guru['id']; ?>, <?php echo $guru['user_id']; ?>, '<?php echo htmlspecialchars($guru['nama_lengkap']); ?>', '<?php echo htmlspecialchars($guru['nip']); ?>', '<?php echo htmlspecialchars($guru['no_hp']); ?>', '<?php echo htmlspecialchars($guru['email']); ?>')" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;">
+                                    <button class="btn btn-secondary btn-sm btn-edit-guru" 
+                                            style="padding: 4px 8px; font-size: 11px;"
+                                            data-id="<?php echo $guru['id']; ?>"
+                                            data-user-id="<?php echo $guru['user_id']; ?>"
+                                            data-nama="<?php echo htmlspecialchars($guru['nama_lengkap'], ENT_QUOTES); ?>"
+                                            data-nip="<?php echo htmlspecialchars($guru['nip'] ?? '', ENT_QUOTES); ?>"
+                                            data-no-hp="<?php echo htmlspecialchars($guru['no_hp'] ?? '', ENT_QUOTES); ?>"
+                                            data-email="<?php echo htmlspecialchars($guru['email'] ?? '', ENT_QUOTES); ?>">
                                         <i class="fa-solid fa-pen-to-square"></i> Edit
                                     </button>
                                     
@@ -442,6 +455,21 @@ function showEditModal(id, userId, nama, nip, no_hp, email) {
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('show');
 }
+
+// Delegasi event listener untuk menangani klik Edit secara aman
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-edit-guru');
+    if (btn) {
+        const id = btn.getAttribute('data-id');
+        const userId = btn.getAttribute('data-user-id');
+        const nama = btn.getAttribute('data-nama');
+        const nip = btn.getAttribute('data-nip');
+        const noHp = btn.getAttribute('data-no-hp');
+        const email = btn.getAttribute('data-email');
+        
+        showEditModal(id, userId, nama, nip, noHp, email);
+    }
+});
 </script>
 
 </main>

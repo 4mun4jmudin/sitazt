@@ -231,6 +231,9 @@ try {
         <i class="fa-solid fa-circle-check"></i>
         <div><?php echo htmlspecialchars($success); ?></div>
     </div>
+    <script>
+        alert("Pemberitahuan: <?php echo htmlspecialchars($success); ?>");
+    </script>
 <?php endif; ?>
 
 <!-- Tabel Data -->
@@ -280,7 +283,11 @@ try {
                                         </form>
                                     <?php endif; ?>
                                     
-                                    <button onclick="showEditModal(<?php echo $ta['id']; ?>, '<?php echo htmlspecialchars($ta['tahun']); ?>', '<?php echo $ta['semester']; ?>')" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;">
+                                    <button class="btn btn-secondary btn-sm btn-edit-ta" 
+                                            style="padding: 4px 8px; font-size: 11px;"
+                                            data-id="<?php echo $ta['id']; ?>"
+                                            data-tahun="<?php echo htmlspecialchars($ta['tahun'], ENT_QUOTES); ?>"
+                                            data-semester="<?php echo htmlspecialchars($ta['semester'], ENT_QUOTES); ?>">
                                         <i class="fa-solid fa-pen-to-square"></i> Edit
                                     </button>
                                     
@@ -459,6 +466,17 @@ function showEditModal(id, tahun, semester) {
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('show');
 }
+
+// Delegasi event listener untuk menangani klik Edit secara aman
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-edit-ta');
+    if (btn) {
+        const id = btn.getAttribute('data-id');
+        const tahun = btn.getAttribute('data-tahun');
+        const semester = btn.getAttribute('data-semester');
+        showEditModal(id, tahun, semester);
+    }
+});
 
 // JS Kenaikan Kelas Massal
 function previewPromotionStudents(kelasId) {

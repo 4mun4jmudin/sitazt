@@ -6,7 +6,12 @@ require_once 'header.php';
 $error = '';
 $setoran_list = [];
 $avg_grade_letter = 'N/A';
-$grade_counts = ['A' => 0, 'B' => 0, 'C' => 0, 'D' => 0];
+$grade_counts = [
+    'Sangat Lancar' => 0,
+    'Lancar Terbata-Bata' => 0,
+    'Lancar dengan Bantuan' => 0,
+    'Tidak Lancar / Ulangi' => 0
+];
 $total_setoran = 0;
 
 if ($anak_aktif) {
@@ -25,49 +30,42 @@ if ($anak_aktif) {
         if ($total_setoran > 0) {
             $total_points = 0;
             $graded_count = 0;
+            $total_score = 0;
+            $score_count = 0;
             foreach ($setoran_list as $s) {
-                $nilai = strtoupper(trim($s['nilai']));
-                $points = 0;
-                if ($nilai === 'A' || $nilai === 'A+') {
-                    $points = 4.0;
-                    $grade_counts['A']++;
-                } elseif ($nilai === 'A-') {
-                    $points = 3.7;
-                    $grade_counts['A']++;
-                } elseif ($nilai === 'B+') {
-                    $points = 3.3;
-                    $grade_counts['B']++;
-                } elseif ($nilai === 'B') {
-                    $points = 3.0;
-                    $grade_counts['B']++;
-                } elseif ($nilai === 'B-') {
-                    $points = 2.7;
-                    $grade_counts['B']++;
-                } elseif ($nilai === 'C+') {
-                    $points = 2.3;
-                    $grade_counts['C']++;
-                } elseif ($nilai === 'C') {
-                    $points = 2.0;
-                    $grade_counts['C']++;
-                } elseif ($nilai === 'D') {
-                    $points = 1.0;
-                    $grade_counts['D']++;
+                $nilai = trim($s['nilai']);
+                if (strcasecmp($nilai, 'Sangat Lancar') === 0) {
+                    $grade_counts['Sangat Lancar']++;
+                } elseif (strcasecmp($nilai, 'Lancar Terbata-Bata') === 0) {
+                    $grade_counts['Lancar Terbata-Bata']++;
+                } elseif (strcasecmp($nilai, 'Lancar dengan Bantuan') === 0) {
+                    $grade_counts['Lancar dengan Bantuan']++;
                 } else {
-                    $points = 1.0;
-                    $grade_counts['D']++;
+                    $grade_counts['Tidak Lancar / Ulangi']++;
                 }
-                $total_points += $points;
-                $graded_count++;
+                
+                if ($s['nilai_angka'] !== null) {
+                    $total_score += intval($s['nilai_angka']);
+                    $score_count++;
+                } else {
+                    // Fallback
+                    if (strcasecmp($nilai, 'Sangat Lancar') === 0) $total_score += 90;
+                    elseif (strcasecmp($nilai, 'Lancar Terbata-Bata') === 0) $total_score += 75;
+                    elseif (strcasecmp($nilai, 'Lancar dengan Bantuan') === 0) $total_score += 65;
+                    else $total_score += 50;
+                    $score_count++;
+                }
             }
             
-            if ($graded_count > 0) {
-                $gpa = $total_points / $graded_count;
-                if ($gpa >= 3.8) $avg_grade_letter = 'Mumtaz (A)';
-                elseif ($gpa >= 3.4) $avg_grade_letter = 'Jayyid Jiddan (A-)';
-                elseif ($gpa >= 3.0) $avg_grade_letter = 'Jayyid (B+)';
-                elseif ($gpa >= 2.6) $avg_grade_letter = 'Jayyid (B)';
-                elseif ($gpa >= 2.0) $avg_grade_letter = 'Maqbul (C)';
-                else $avg_grade_letter = 'Dhaif (D)';
+            if ($score_count > 0) {
+                $avg_score = $total_score / $score_count;
+                $avg_predikat = 'Belum Dinilai';
+                if ($avg_score >= 85) $avg_predikat = 'Sangat Lancar';
+                elseif ($avg_score >= 70) $avg_predikat = 'Lancar Terbata-Bata';
+                elseif ($avg_score >= 60) $avg_predikat = 'Lancar dengan Bantuan';
+                else $avg_predikat = 'Tidak Lancar / Ulangi';
+                
+                $avg_grade_letter = formatGrade($avg_predikat, $avg_score) . " (" . number_format($avg_score, 1) . ")";
             }
         }
     } catch (\PDOException $e) {
@@ -117,22 +115,22 @@ if ($anak_aktif) {
             <h3 style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; width: 100%;">
                 Penyebaran Nilai Hafalan
             </h3>
-            <div style="display: flex; gap: 15px; width: 100%; justify-content: space-between; align-items: center; margin-top: 5px;">
-                <div style="flex: 1; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 10px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #16a34a; text-transform: uppercase;">A / A-</div>
-                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;"><?php echo $grade_counts['A']; ?></div>
+            <div style="display: flex; gap: 10px; width: 100%; justify-content: space-between; align-items: center; margin-top: 5px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 100px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 10px;">
+                    <div style="font-size: 9px; font-weight: 600; color: #16a34a; text-transform: uppercase;">Sangat Lancar</div>
+                    <div style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px;"><?php echo $grade_counts['Sangat Lancar']; ?></div>
                 </div>
-                <div style="flex: 1; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 10px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #2563eb; text-transform: uppercase;">B+ / B / B-</div>
-                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;"><?php echo $grade_counts['B']; ?></div>
+                <div style="flex: 1; min-width: 100px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 10px;">
+                    <div style="font-size: 9px; font-weight: 600; color: #0d5c34; text-transform: uppercase;">Lancar Terbata-Bata</div>
+                    <div style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px;"><?php echo $grade_counts['Lancar Terbata-Bata']; ?></div>
                 </div>
-                <div style="flex: 1; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 10px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #ca8a04; text-transform: uppercase;">C+ / C</div>
-                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;"><?php echo $grade_counts['C']; ?></div>
+                <div style="flex: 1; min-width: 100px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 10px;">
+                    <div style="font-size: 9px; font-weight: 600; color: #ca8a04; text-transform: uppercase;">Lancar dengan Bantuan</div>
+                    <div style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px;"><?php echo $grade_counts['Lancar dengan Bantuan']; ?></div>
                 </div>
-                <div style="flex: 1; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 10px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #dc2626; text-transform: uppercase;">D & Lainnya</div>
-                    <div style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px;"><?php echo $grade_counts['D']; ?></div>
+                <div style="flex: 1; min-width: 100px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 10px;">
+                    <div style="font-size: 9px; font-weight: 600; color: #dc2626; text-transform: uppercase;">Tidak Lancar / Ulangi</div>
+                    <div style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px;"><?php echo $grade_counts['Tidak Lancar / Ulangi']; ?></div>
                 </div>
             </div>
         </div>
@@ -177,7 +175,8 @@ if ($anak_aktif) {
                             <th>Tanggal</th>
                             <th>Surah & Ayat</th>
                             <th>Kategori</th>
-                            <th style="text-align: center; width: 100px;">Nilai Huruf</th>
+                            <th style="text-align: center; width: 100px;">Nilai Angka</th>
+                            <th style="text-align: center; width: 120px;">Predikat</th>
                             <th>Keterangan Kelancaran</th>
                             <th>Guru Penguji</th>
                         </tr>
@@ -186,27 +185,21 @@ if ($anak_aktif) {
                         <?php 
                         $no = 1;
                         foreach ($setoran_list as $setoran): 
-                            $nilai = strtoupper(trim($setoran['nilai']));
+                            $nilai = trim($setoran['nilai']);
                             $predikat = '';
                             $nilai_style = '';
                             
-                            if ($nilai === 'A' || $nilai === 'A+') {
-                                $predikat = 'Sangat Lancar (Mumtaz)';
+                            if (strcasecmp($nilai, 'Sangat Lancar') === 0) {
+                                $predikat = 'Sangat Lancar';
                                 $nilai_style = 'background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;';
-                            } elseif ($nilai === 'A-') {
-                                $predikat = 'Lancar (Jayyid Jiddan)';
-                                $nilai_style = 'background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0;';
-                            } elseif ($nilai === 'B+' || $nilai === 'B') {
-                                $predikat = 'Cukup Lancar (Jayyid)';
-                                $nilai_style = 'background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;';
-                            } elseif ($nilai === 'B-') {
-                                $predikat = 'Lancar Dengan Sedikit Bantuan';
-                                $nilai_style = 'background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;';
-                            } elseif ($nilai === 'C+' || $nilai === 'C') {
-                                $predikat = 'Kurang Lancar (Maqbul)';
+                            } elseif (strcasecmp($nilai, 'Lancar Terbata-Bata') === 0) {
+                                $predikat = 'Lancar Terbata-Bata';
                                 $nilai_style = 'background-color: #fefce8; color: #854d0e; border: 1px solid #fef08a;';
+                            } elseif (strcasecmp($nilai, 'Lancar dengan Bantuan') === 0) {
+                                $predikat = 'Lancar dengan Bantuan';
+                                $nilai_style = 'background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;';
                             } else {
-                                $predikat = 'Banyak Kesalahan (Dhaif)';
+                                $predikat = 'Tidak Lancar / Ulangi';
                                 $nilai_style = 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;';
                             }
                             
@@ -229,13 +222,16 @@ if ($anak_aktif) {
                                         <?php echo $jenis_label; ?>
                                     </span>
                                 </td>
+                                <td style="text-align: center; font-weight: bold; color: var(--primary-color);">
+                                    <?php echo htmlspecialchars($setoran['nilai_angka'] ?? '-'); ?>
+                                </td>
                                 <td style="text-align: center;">
-                                    <span style="display: inline-block; width: 38px; height: 38px; line-height: 36px; text-align: center; border-radius: 50%; font-weight: 800; font-size: 14px; <?php echo $nilai_style; ?>">
+                                    <span style="display: inline-block; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 12px; line-height: normal; <?php echo $nilai_style; ?>">
                                         <?php echo htmlspecialchars($setoran['nilai']); ?>
                                     </span>
                                 </td>
                                 <td style="font-weight: 500; color: var(--text-main);">
-                                    <?php echo $predikat; ?>
+                                    <?php echo htmlspecialchars(formatGrade($setoran['nilai'], $setoran['nilai_angka'])); ?>
                                 </td>
                                 <td>
                                     <span style="font-size: 13px; color: var(--text-main);"><?php echo htmlspecialchars($setoran['nama_guru']); ?></span>

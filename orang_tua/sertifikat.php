@@ -2,10 +2,38 @@
 // orang_tua/sertifikat.php
 require_once '../config/database.php';
 
+// Migrasi DB: Tambahkan catatan jika belum ada
+try {
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN catatan TEXT NULL AFTER predikat");
+} catch (\PDOException $e) {
+    // Abaikan jika sudah ada
+}
+try {
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN nama_kepsek VARCHAR(150) NULL AFTER catatan");
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN nip_kepsek VARCHAR(50) NULL AFTER nama_kepsek");
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN nama_guru_ttd VARCHAR(150) NULL AFTER nip_kepsek");
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN nip_guru_ttd VARCHAR(50) NULL AFTER nama_guru_ttd");
+} catch (\PDOException $e) {
+    // Abaikan jika sudah ada
+}
+try {
+    $stmt_check_old_cert = $pdo->query("SELECT COUNT(*) FROM sertifikat WHERE predikat IN ('Mumtaz', 'Jayyid Jiddan', 'Jayyid', 'Maqbul', 'Dhaif')");
+    if ($stmt_check_old_cert && $stmt_check_old_cert->fetchColumn() > 0) {
+        $pdo->exec("UPDATE sertifikat SET predikat = 'Sangat Lancar' WHERE predikat = 'Mumtaz'");
+        $pdo->exec("UPDATE sertifikat SET predikat = 'Lancar Terbata-Bata' WHERE predikat IN ('Jayyid Jiddan', 'Jayyid')");
+        $pdo->exec("UPDATE sertifikat SET predikat = 'Lancar dengan Bantuan' WHERE predikat = 'Maqbul'");
+        $pdo->exec("UPDATE sertifikat SET predikat = 'Tidak Lancar / Ulangi' WHERE predikat = 'Dhaif'");
+    }
+} catch (\PDOException $e) {
+    // Abaikan jika gagal
+}
+
 $print_cert_id = intval($_GET['print_cert_id'] ?? 0);
 if ($print_cert_id > 0) {
     // Tampilan cetak sertifikat untuk Orang Tua
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'orang_tua') {
         die("Akses ditolak.");
     }
@@ -59,12 +87,12 @@ if ($print_cert_id > 0) {
             }
             .certificate-wrapper {
                 width: 900px;
-                height: 620px;
+                height: 680px;
                 background-color: #ffffff;
                 box-shadow: 0 15px 35px rgba(0,0,0,0.1);
                 border-radius: 8px;
                 position: relative;
-                padding: 40px;
+                padding: 25px;
                 box-sizing: border-box;
                 overflow: hidden;
             }
@@ -82,7 +110,7 @@ if ($print_cert_id > 0) {
                 border: 4px double #ffd700;
                 box-sizing: border-box;
                 position: relative;
-                padding: 20px 40px;
+                padding: 10px 45px;
             }
             .corner-ornament {
                 position: absolute;
@@ -96,25 +124,64 @@ if ($print_cert_id > 0) {
             .bottom-left { bottom: -10px; left: -10px; border-right: none; border-top: none; }
             .bottom-right { bottom: -10px; right: -10px; border-left: none; border-top: none; }
             
-            .header-logo {
-                text-align: center;
-                margin-bottom: 20px;
+            .kop-surat-cert {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-bottom: 2px solid #0d5c34;
+                padding-bottom: 8px;
+                margin-bottom: 15px;
+                gap: 15px;
             }
-            .school-name {
-                font-family: 'Cinzel', serif;
-                font-size: 18px;
-                font-weight: 700;
-                color: #0d5c34;
-                letter-spacing: 2px;
-                margin-top: 5px;
+            .kop-logo-cert img {
+                height: 55px;
+            }
+            .kop-text-cert {
+                text-align: center;
+            }
+            .kop-text-cert h2 {
+                margin: 0;
+                font-size: 12px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text-cert h1 {
+                margin: 1px 0;
+                font-size: 14px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text-cert h3 {
+                margin: 1px 0;
+                font-size: 10px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text-cert p {
+                margin: 1px 0;
+                font-size: 9px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text-cert p.email {
+                margin-top: 2px;
+                font-size: 9px;
+            }
+            .kop-text-cert p.email a {
+                color: #0000ff;
+                text-decoration: underline;
             }
             .cert-title {
                 font-family: 'Cinzel', serif;
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: 800;
                 color: #ccab00;
                 text-align: center;
-                margin: 15px 0 5px 0;
+                margin: 8px 0 2px 0;
                 letter-spacing: 4px;
                 text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             }
@@ -124,7 +191,7 @@ if ($print_cert_id > 0) {
                 text-transform: uppercase;
                 letter-spacing: 3px;
                 color: #64748b;
-                margin-bottom: 30px;
+                margin-bottom: 10px;
                 font-weight: 600;
             }
             .cert-body {
@@ -135,9 +202,9 @@ if ($print_cert_id > 0) {
             }
             .student-name {
                 font-family: 'Great Vibes', cursive;
-                font-size: 44px;
+                font-size: 38px;
                 color: #073b20;
-                margin: 10px 0;
+                margin: 4px 0;
                 display: block;
                 font-weight: 400;
             }
@@ -148,7 +215,7 @@ if ($print_cert_id > 0) {
                 padding: 4px 20px;
                 border-radius: 30px;
                 font-weight: 700;
-                margin-top: 15px;
+                margin-top: 8px;
                 font-size: 14px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
@@ -157,7 +224,7 @@ if ($print_cert_id > 0) {
             .signature-section {
                 display: flex;
                 justify-content: space-between;
-                margin-top: 45px;
+                margin-top: 20px;
                 padding: 0 40px;
             }
             .sig-box {
@@ -212,9 +279,17 @@ if ($print_cert_id > 0) {
                     <div class="corner-ornament bottom-left"></div>
                     <div class="corner-ornament bottom-right"></div>
                     
-                    <div class="header-logo">
-                        <img src="../assets/images/logo.jpg" alt="Logo" style="height: 45px;">
-                        <div class="school-name">MI Al-Adzkiya Jakarta</div>
+                    <div class="kop-surat-cert">
+                        <div class="kop-logo-cert">
+                            <img src="../assets/images/logo.jpg" alt="Logo">
+                        </div>
+                        <div class="kop-text-cert">
+                            <h2>YAYASAN AL-BAROROH BLUBUR LIMBANGAN</h2>
+                            <h1>MADRASAH IBTIDAIYAH (MI) AL-ADZKIYA</h1>
+                            <h3>STATUS <u>TERAKREDITASI : B</u></h3>
+                            <p>Kp. Cicadas RT.02 RW.08 Desa Pasirwaru Kec. Bl. Limbangan Garut 44186</p>
+                            <p class="email">email : <a href="mailto:mi.aladzkiya@yahoo.com">mi.aladzkiya@yahoo.com</a></p>
+                        </div>
                     </div>
                     
                     <div class="cert-title">SERTIFIKAT TAHFIDZ</div>
@@ -230,7 +305,21 @@ if ($print_cert_id > 0) {
                         </strong>
                         dengan predikat kelancaran kelulusan:
                         <br>
-                        <span class="predikat-badge"><?php echo htmlspecialchars($cert['predikat']); ?></span>
+                        <?php
+                        $predikat_label = htmlspecialchars($cert['predikat']);
+                        if ($predikat_label === 'Sangat Lancar') {
+                            $predikat_display = 'Sangat Lancar (A+, A, A-)';
+                        } elseif ($predikat_label === 'Lancar Terbata-Bata') {
+                            $predikat_display = 'Lancar Terbata-Bata (B+, B, B-)';
+                        } elseif ($predikat_label === 'Lancar dengan Bantuan') {
+                            $predikat_display = 'Lancar dengan Bantuan (C+, C, C-)';
+                        } elseif ($predikat_label === 'Tidak Lancar / Ulangi') {
+                            $predikat_display = 'Tidak Lancar / Ulangi (D)';
+                        } else {
+                            $predikat_display = $predikat_label;
+                        }
+                        ?>
+                        <span class="predikat-badge"><?php echo $predikat_display; ?></span>
                     </div>
                     
                     <div class="signature-section">
@@ -238,13 +327,13 @@ if ($print_cert_id > 0) {
                             <p>Mengetahui,</p>
                             <p style="font-weight: 600; margin-top:-5px;">Kepala Madrasah</p>
                             <div class="sig-space"></div>
-                            <p><strong>H. Mohammad Syafi'i, M.Pd</strong><br>NIP. 197805122005041001</p>
+                            <p><strong><?php echo htmlspecialchars(!empty($cert['nama_kepsek']) ? $cert['nama_kepsek'] : "H. Mohammad Syafi'i, M.Pd"); ?></strong><br>NIP. <?php echo htmlspecialchars(!empty($cert['nip_kepsek']) ? $cert['nip_kepsek'] : "197805122005041001"); ?></p>
                         </div>
                         <div class="sig-box">
                             <p>Jakarta, <?php echo date('d M Y', strtotime($cert['tanggal_lulus'])); ?></p>
                             <p style="font-weight: 600; margin-top:-5px;">Guru Pembimbing Tahfidz</p>
                             <div class="sig-space"></div>
-                            <p><strong><u><?php echo htmlspecialchars($cert['nama_guru']); ?></u></strong><br>NIP. <?php echo htmlspecialchars($cert['nip_guru'] ?? '-'); ?></p>
+                            <p><strong><u><?php echo htmlspecialchars(!empty($cert['nama_guru_ttd']) ? $cert['nama_guru_ttd'] : $cert['nama_guru']); ?></u></strong><br>NIP. <?php echo htmlspecialchars(!empty($cert['nip_guru_ttd']) ? $cert['nip_guru_ttd'] : ($cert['nip_guru'] ?? '-')); ?></p>
                         </div>
                     </div>
                 </div>

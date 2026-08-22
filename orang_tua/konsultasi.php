@@ -94,6 +94,30 @@ if (isset($_GET['action'])) {
         }
     }
     
+    if ($_GET['action'] === 'delete_message') {
+        $message_id = intval($_GET['message_id'] ?? 0);
+        if ($message_id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'ID pesan tidak valid']);
+            exit;
+        }
+        
+        try {
+            $stmt_del = $pdo->prepare("
+                DELETE FROM konsultasi 
+                WHERE id = :id AND (pengirim_id = :my_id OR penerima_id = :my_id)
+            ");
+            $stmt_del->execute([
+                'id' => $message_id,
+                'my_id' => $user_id
+            ]);
+            echo json_encode(['success' => true]);
+            exit;
+        } catch (\PDOException $e) {
+            echo json_encode(['success' => false, 'message' => 'Gagal menghapus pesan: ' . $e->getMessage()]);
+            exit;
+        }
+    }
+    
     if ($_GET['action'] === 'send_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $pesan = trim($_POST['message'] ?? '');
         if ($pesan === '') {
@@ -448,7 +472,12 @@ if ($anak_aktif) {
                                 <div class="chat-message-row ${rowClass}">
                                     <div class="chat-bubble">
                                         <div style="word-break: break-word; white-space: pre-wrap;">${escapeHtml(msg.pesan)}</div>
-                                        <span class="chat-time">${timeStr}</span>
+                                        <div style="display: flex; align-items: center; justify-content: ${isSent ? 'flex-end' : 'flex-start'}; gap: 8px; margin-top: 4px;">
+                                            <span class="chat-time" style="margin-top: 0;">${timeStr}</span>
+                                            <button class="delete-msg-btn" onclick="deleteMessage(${msg.id})" title="Hapus Pesan" style="background: none; border: none; padding: 0; cursor: pointer; color: ${isSent ? 'rgba(255,255,255,0.6)' : 'var(--error-color)'}; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             `;
@@ -465,6 +494,21 @@ if ($anak_aktif) {
                     }
                 })
                 .catch(err => console.error('Error fetching messages:', err));
+        }
+
+        function deleteMessage(messageId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus pesan ini?')) return;
+            
+            fetch('konsultasi.php?action=delete_message&message_id=' + messageId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadMessages(false);
+                    } else {
+                        alert('Gagal menghapus pesan: ' + (data.message || 'Error tidak diketahui'));
+                    }
+                })
+                .catch(err => console.error('Error deleting message:', err));
         }
 
         function sendMessage(event) {

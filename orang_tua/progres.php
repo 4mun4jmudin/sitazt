@@ -98,7 +98,8 @@ if ($anak_aktif) {
                             <th>Surah</th>
                             <th style="text-align: center;">Ayat</th>
                             <th>Guru Pembimbing</th>
-                            <th style="text-align: center;">Nilai</th>
+                            <th style="text-align: center; width: 100px;">Nilai Angka</th>
+                            <th style="text-align: center; width: 120px;">Predikat</th>
                             <th style="text-align: center; width: 120px;">Aksi</th>
                         </tr>
                     </thead>
@@ -136,8 +137,11 @@ if ($anak_aktif) {
                                         <span><?php echo htmlspecialchars($setoran['nama_guru']); ?></span>
                                     </div>
                                 </td>
+                                <td style="text-align: center; font-weight: bold; color: var(--primary-color);">
+                                    <?php echo htmlspecialchars($setoran['nilai_angka'] ?? '-'); ?>
+                                </td>
                                 <td style="text-align: center;">
-                                    <span style="display: inline-block; width: 32px; height: 32px; line-height: 30px; text-align: center; border-radius: 6px; font-weight: 800; font-size: 14px; background-color: #f8fafc; border: 1px solid #e2e8f0; color: var(--primary-color);">
+                                    <span style="display: inline-block; padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 12px; line-height: normal; background-color: #f8fafc; border: 1px solid #e2e8f0; color: var(--primary-color);">
                                         <?php echo htmlspecialchars($setoran['nilai']); ?>
                                     </span>
                                 </td>
@@ -192,15 +196,19 @@ if ($anak_aktif) {
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div>
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block;">Nilai Kelancaran</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block;">Skor Angka</span>
+                            <strong id="detSkor" style="font-size: 14px; color: var(--primary-color);"></strong>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block;">Predikat Kelancaran</span>
                             <div style="margin-top: 2px;">
                                 <span id="detNilai" style="display: inline-block; padding: 2px 8px; font-weight: bold; border-radius: 4px; font-size: 12px;"></span>
                             </div>
                         </div>
-                        <div>
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block;">Guru Pembimbing</span>
-                            <strong id="detGuru"></strong>
-                        </div>
+                    </div>
+                    <div>
+                        <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display: block;">Guru Pembimbing</span>
+                        <strong id="detGuru"></strong>
                     </div>
 
                     <div>
@@ -281,23 +289,21 @@ if ($anak_aktif) {
         document.getElementById('detJenis').style = jenisStyle + " font-weight: 600; padding: 2px 8px; font-size: 11px; display: inline-block; margin-top: 2px;";
 
         // Nilai style
-        var nilai = data.nilai.toUpperCase().trim();
+        var nilai = data.nilai.trim();
+        var nilaiLower = nilai.toLowerCase();
         var nilaiStyle = '';
-        if (nilai === 'A' || nilai === 'A+') {
+        if (nilaiLower === 'sangat lancar') {
             nilaiStyle = 'background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;';
-        } else if (nilai === 'A-') {
-            nilaiStyle = 'background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0;';
-        } else if (nilai === 'B+' || nilai === 'B') {
-            nilaiStyle = 'background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;';
-        } else if (nilai === 'B-') {
-            nilaiStyle = 'background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;';
-        } else if (nilai === 'C+' || nilai === 'C') {
+        } else if (nilaiLower === 'lancar terbata-bata') {
             nilaiStyle = 'background-color: #fefce8; color: #854d0e; border: 1px solid #fef08a;';
+        } else if (nilaiLower === 'lancar dengan bantuan') {
+            nilaiStyle = 'background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;';
         } else {
             nilaiStyle = 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;';
         }
         document.getElementById('detNilai').innerText = nilai;
         document.getElementById('detNilai').style = nilaiStyle + " display: inline-block; padding: 4px 10px; font-weight: bold; border-radius: 4px; font-size: 12px; margin-top: 2px;";
+        document.getElementById('detSkor').innerText = data.nilai_angka ? data.nilai_angka : '-';
         
         document.getElementById('detailModal').classList.add('show');
     }

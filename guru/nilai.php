@@ -2,11 +2,29 @@
 // guru/nilai.php
 require_once '../config/database.php';
 
+// Ambil tahun ajaran aktif
+$ta_aktif = $pdo->query("SELECT * FROM tahun_ajaran WHERE status = 'aktif' LIMIT 1")->fetch();
+
 // Cek apakah mode print diaktifkan
 $print_siswa_id = intval($_GET['print_siswa_id'] ?? 0);
 $periode_filter = $_GET['periode_filter'] ?? 'semua';
 $filter_sql = "";
-if ($periode_filter === 'minggu') {
+
+if ($periode_filter === 'semua') {
+    if ($ta_aktif) {
+        $years = explode('/', $ta_aktif['tahun']);
+        if (count($years) === 2) {
+            if ($ta_aktif['semester'] === 'Ganjil') {
+                $start_date = trim($years[0]) . "-07-01";
+                $end_date = trim($years[0]) . "-12-31";
+            } else {
+                $start_date = trim($years[1]) . "-01-01";
+                $end_date = trim($years[1]) . "-06-30";
+            }
+            $filter_sql = " AND tanggal BETWEEN '$start_date' AND '$end_date'";
+        }
+    }
+} elseif ($periode_filter === 'minggu') {
     $filter_sql = " AND YEARWEEK(tanggal, 1) = YEARWEEK(CURRENT_DATE(), 1)";
 } elseif ($periode_filter === 'bulan') {
     $filter_sql = " AND YEAR(tanggal) = YEAR(CURRENT_DATE()) AND MONTH(tanggal) = MONTH(CURRENT_DATE())";
@@ -49,42 +67,41 @@ if ($print_siswa_id > 0) {
         $stmt_setoran->execute(['siswa_id' => $print_siswa_id]);
         $setoran_list = $stmt_setoran->fetchAll();
         
-        // Ambil tahun ajaran aktif
-        $ta_aktif = $pdo->query("SELECT * FROM tahun_ajaran WHERE status = 'aktif' LIMIT 1")->fetch();
+        // Ta aktif sudah dimuat di bagian atas halaman
         
     } catch (\PDOException $e) {
         die("Error database: " . $e->getMessage());
     }
     
     // Hitung rata-rata nilai
-    $total_points = 0;
-    $graded_count = 0;
+    $total_score = 0;
+    $score_count = 0;
     $avg_grade_letter = 'Belum Dinilai';
+    $avg_score = 0;
     
     foreach ($setoran_list as $s) {
-        $nilai = strtoupper(trim($s['nilai']));
-        $points = 0;
-        if ($nilai === 'A' || $nilai === 'A+') $points = 4.0;
-        elseif ($nilai === 'A-') $points = 3.7;
-        elseif ($nilai === 'B+') $points = 3.3;
-        elseif ($nilai === 'B') $points = 3.0;
-        elseif ($nilai === 'B-') $points = 2.7;
-        elseif ($nilai === 'C+') $points = 2.3;
-        elseif ($nilai === 'C') $points = 2.0;
-        else $points = 1.0;
-        
-        $total_points += $points;
-        $graded_count++;
+        $nilai = trim($s['nilai']);
+        if ($s['nilai_angka'] !== null) {
+            $total_score += intval($s['nilai_angka']);
+            $score_count++;
+        } else {
+            // Fallback
+            if (strcasecmp($nilai, 'Sangat Lancar') === 0) $total_score += 90;
+            elseif (strcasecmp($nilai, 'Lancar Terbata-Bata') === 0) $total_score += 75;
+            elseif (strcasecmp($nilai, 'Lancar dengan Bantuan') === 0) $total_score += 65;
+            else $total_score += 50;
+            $score_count++;
+        }
     }
     
-    if ($graded_count > 0) {
-        $gpa = $total_points / $graded_count;
-        if ($gpa >= 3.8) $avg_grade_letter = 'Mumtaz (A)';
-        elseif ($gpa >= 3.4) $avg_grade_letter = 'Jayyid Jiddan (A-)';
-        elseif ($gpa >= 3.0) $avg_grade_letter = 'Jayyid (B+)';
-        elseif ($gpa >= 2.6) $avg_grade_letter = 'Jayyid (B)';
-        elseif ($gpa >= 2.0) $avg_grade_letter = 'Maqbul (C)';
-        else $avg_grade_letter = 'Dhaif (D)';
+    if ($score_count > 0) {
+        $avg_score = $total_score / $score_count;
+        if ($avg_score >= 85) $avg_predikat = 'Sangat Lancar';
+        elseif ($avg_score >= 70) $avg_predikat = 'Lancar Terbata-Bata';
+        elseif ($avg_score >= 60) $avg_predikat = 'Lancar dengan Bantuan';
+        else $avg_predikat = 'Tidak Lancar / Ulangi';
+        
+        $avg_grade_letter = formatGrade($avg_predikat, $avg_score) . " (" . number_format($avg_score, 1) . ")";
     }
     ?>
     <!DOCTYPE html>
@@ -101,26 +118,59 @@ if ($print_siswa_id > 0) {
                 font-size: 14px;
             }
             .kop-surat {
-                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 border-bottom: 3px double #000000;
                 padding-bottom: 15px;
                 margin-bottom: 25px;
+                gap: 20px;
             }
-            .kop-surat h2 {
+            .kop-logo img {
+                height: 85px;
+            }
+            .kop-text {
+                text-align: center;
+                flex-grow: 1;
+            }
+            .kop-text h2 {
                 margin: 0;
-                font-size: 20px;
+                font-size: 18px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
                 text-transform: uppercase;
-                letter-spacing: 1px;
             }
-            .kop-surat h1 {
-                margin: 5px 0;
-                font-size: 24px;
-                color: #0d5c34;
+            .kop-text h1 {
+                margin: 3px 0;
+                font-size: 22px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+                text-transform: uppercase;
             }
-            .kop-surat p {
+            .kop-text h3 {
                 margin: 2px 0;
-                font-size: 12px;
-                font-style: italic;
+                font-size: 14px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+                text-transform: uppercase;
+            }
+            .kop-text p {
+                margin: 2px 0;
+                font-size: 13px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text p.email {
+                margin-top: 5px;
+                font-size: 13px;
+            }
+            .kop-text p.email a {
+                color: #0000ff;
+                text-decoration: underline;
             }
             .title {
                 text-align: center;
@@ -194,9 +244,16 @@ if ($print_siswa_id > 0) {
         </div>
         
         <div class="kop-surat">
-            <h2>Yayasan Pendidikan Islam</h2>
-            <h1>MADRASAH IBTIDAIYAH AL-ADZKIYA</h1>
-            <p>Jl. Pendidikan No. 45, Jakarta | Telp: 021-12345678 | Email: info@aladzkiya.sch.id</p>
+            <div class="kop-logo">
+                <img src="../assets/images/logo.jpg" alt="Logo">
+            </div>
+            <div class="kop-text">
+                <h2>YAYASAN AL-BAROROH BLUBUR LIMBANGAN</h2>
+                <h1>MADRASAH IBTIDAIYAH (MI) AL-ADZKIYA</h1>
+                <h3>STATUS <u>TERAKREDITASI : B</u></h3>
+                <p>Kp. Cicadas RT.02 RW.08 Desa Pasirwaru Kec. Bl. Limbangan Garut 44186</p>
+                <p class="email">email : <a href="mailto:mi.aladzkiya@yahoo.com">mi.aladzkiya@yahoo.com</a></p>
+            </div>
         </div>
         
         <div class="title">RAPOR PERKEMBANGAN TAHFIDZ AL-QUR'AN</div>
@@ -229,13 +286,14 @@ if ($print_siswa_id > 0) {
                     <th style="width: 15%; text-align: center;">Kategori</th>
                     <th style="width: 30%;">Surah</th>
                     <th style="width: 15%; text-align: center;">Ayat</th>
-                    <th style="width: 10%; text-align: center;">Nilai</th>
+                    <th style="width: 10%; text-align: center;">Skor Angka</th>
+                    <th style="width: 15%; text-align: center;">Predikat</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($setoran_list)): ?>
                     <tr>
-                        <td colspan="6" style="text-align: center; font-style: italic;">Belum ada riwayat setoran hafalan.</td>
+                        <td colspan="7" style="text-align: center; font-style: italic;">Belum ada riwayat setoran hafalan.</td>
                     </tr>
                 <?php else: ?>
                     <?php 
@@ -248,7 +306,8 @@ if ($print_siswa_id > 0) {
                             <td style="text-align: center;"><?php echo $row['jenis'] === 'ziadah' ? 'Ziadah' : 'Murajaah'; ?></td>
                             <td><strong><?php echo htmlspecialchars($row['surah']); ?></strong></td>
                             <td style="text-align: center;"><?php echo $row['ayat_mulai']; ?> - <?php echo $row['ayat_selesai']; ?></td>
-                            <td style="text-align: center; font-weight: bold;"><?php echo htmlspecialchars($row['nilai']); ?></td>
+                            <td style="text-align: center; font-weight: bold;"><?php echo htmlspecialchars($row['nilai_angka'] ?? '-'); ?></td>
+                            <td style="text-align: center; font-weight: bold;"><?php echo htmlspecialchars(formatGrade($row['nilai'], $row['nilai_angka'])); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -258,8 +317,9 @@ if ($print_siswa_id > 0) {
         <h3>B. Ringkasan & Hasil Evaluasi</h3>
         <div class="summary-box">
             <p><strong>Total Setoran Hafalan:</strong> <?php echo count($setoran_list); ?> kali</p>
+            <p><strong>Rata-rata Nilai Angka:</strong> <span style="font-weight: bold; font-size: 16px;"><?php echo $score_count > 0 ? number_format($avg_score, 1) : '-'; ?></span></p>
             <p><strong>Predikat Rata-rata Kelancaran:</strong> <span style="font-weight: bold; color: #0d5c34; font-size: 16px;"><?php echo $avg_grade_letter; ?></span></p>
-            <p style="margin-top: 10px;"><em>*Keterangan Predikat Kelancaran: Mumtaz (Sangat Lancar), Jayyid Jiddan (Lancar), Jayyid (Cukup Lancar), Maqbul (Kurang Lancar), Dhaif (Banyak Kesalahan).</em></p>
+            <p style="margin-top: 10px;"><em>*Keterangan Predikat Kelancaran: Sangat Lancar (A+ dari nilai 95-100, A dari nilai 90-94, A- dari nilai 85-89), Lancar Terbata-Bata (B+ dari nilai 80-84, B dari nilai 75-79, B- 70-74), Lancar dengan Bantuan (C+ dari nilai 70-75, C 65-69 , C-60-64 ), Tidak Lancar / Ulangi (D dari 1-50).</em></p>
         </div>
         
         <div class="signature-area">
@@ -315,60 +375,55 @@ try {
         
         // Loop siswa untuk menghitung poin nilai
         foreach ($siswa_list as $siswa) {
-            $query_setoran = "SELECT nilai FROM setoran_tahfidz WHERE siswa_id = :siswa_id" . $filter_sql;
+            $query_setoran = "SELECT nilai, nilai_angka FROM setoran_tahfidz WHERE siswa_id = :siswa_id" . $filter_sql;
             $stmt_setoran = $pdo->prepare($query_setoran);
             $stmt_setoran->execute(['siswa_id' => $siswa['id']]);
             $setoran = $stmt_setoran->fetchAll();
             
             $total_setoran = count($setoran);
-            $total_points = 0;
-            $graded_count = 0;
+            $total_score = 0;
+            $score_count = 0;
             $predikat = 'Belum Dinilai';
             
-            $grade_counts = ['A' => 0, 'B' => 0, 'C' => 0, 'D' => 0];
+            $grade_counts = [
+                'Sangat Lancar' => 0,
+                'Lancar Terbata-Bata' => 0,
+                'Lancar dengan Bantuan' => 0,
+                'Tidak Lancar / Ulangi' => 0
+            ];
             
             foreach ($setoran as $s) {
-                $nilai = strtoupper(trim($s['nilai']));
-                $points = 0;
-                
-                if ($nilai === 'A' || $nilai === 'A+') {
-                    $points = 4.0;
-                    $grade_counts['A']++;
-                } elseif ($nilai === 'A-') {
-                    $points = 3.7;
-                    $grade_counts['A']++;
-                } elseif ($nilai === 'B+') {
-                    $points = 3.3;
-                    $grade_counts['B']++;
-                } elseif ($nilai === 'B') {
-                    $points = 3.0;
-                    $grade_counts['B']++;
-                } elseif ($nilai === 'B-') {
-                    $points = 2.7;
-                    $grade_counts['B']++;
-                } elseif ($nilai === 'C+') {
-                    $points = 2.3;
-                    $grade_counts['C']++;
-                } elseif ($nilai === 'C') {
-                    $points = 2.0;
-                    $grade_counts['C']++;
+                $nilai = trim($s['nilai']);
+                if (strcasecmp($nilai, 'Sangat Lancar') === 0) {
+                    $grade_counts['Sangat Lancar']++;
+                } elseif (strcasecmp($nilai, 'Lancar Terbata-Bata') === 0) {
+                    $grade_counts['Lancar Terbata-Bata']++;
+                } elseif (strcasecmp($nilai, 'Lancar dengan Bantuan') === 0) {
+                    $grade_counts['Lancar dengan Bantuan']++;
                 } else {
-                    $points = 1.0;
-                    $grade_counts['D']++;
+                    $grade_counts['Tidak Lancar / Ulangi']++;
                 }
                 
-                $total_points += $points;
-                $graded_count++;
+                if ($s['nilai_angka'] !== null) {
+                    $total_score += intval($s['nilai_angka']);
+                    $score_count++;
+                } else {
+                    // Fallback
+                    if (strcasecmp($nilai, 'Sangat Lancar') === 0) $total_score += 90;
+                    elseif (strcasecmp($nilai, 'Lancar Terbata-Bata') === 0) $total_score += 75;
+                    elseif (strcasecmp($nilai, 'Lancar dengan Bantuan') === 0) $total_score += 65;
+                    else $total_score += 50;
+                    $score_count++;
+                }
             }
             
-            if ($graded_count > 0) {
-                $gpa = $total_points / $graded_count;
-                if ($gpa >= 3.8) $predikat = 'Mumtaz (A)';
-                elseif ($gpa >= 3.4) $predikat = 'Jayyid Jiddan (A-)';
-                elseif ($gpa >= 3.0) $predikat = 'Jayyid (B+)';
-                elseif ($gpa >= 2.6) $predikat = 'Jayyid (B)';
-                elseif ($gpa >= 2.0) $predikat = 'Maqbul (C)';
-                else $predikat = 'Dhaif (D)';
+            $avg_score = $score_count > 0 ? ($total_score / $score_count) : 0;
+            
+            if ($score_count > 0) {
+                if ($avg_score >= 85) $predikat = 'Sangat Lancar';
+                elseif ($avg_score >= 70) $predikat = 'Lancar Terbata-Bata';
+                elseif ($avg_score >= 60) $predikat = 'Lancar dengan Bantuan';
+                else $predikat = 'Tidak Lancar / Ulangi';
             }
             
             $siswa_grades[] = [
@@ -377,6 +432,7 @@ try {
                 'nama_lengkap' => $siswa['nama_lengkap'],
                 'kelas' => $siswa['nama_kelas'],
                 'total_setoran' => $total_setoran,
+                'avg_score' => $avg_score,
                 'predikat' => $predikat,
                 'breakdown' => $grade_counts
             ];
@@ -415,6 +471,13 @@ try {
         <h2>Laporan Nilai Kelancaran Setoran Siswa</h2>
     </div>
     
+    <div style="padding: 15px 20px 0 20px;">
+        <div style="position: relative; max-width: 350px;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px;"></i>
+            <input type="text" id="search_nilai_input" onkeyup="filterNilaiTable()" placeholder="Cari nama siswa..." class="form-control" style="font-size: 13px; padding: 8px 12px 8px 35px; border-radius: 8px; border: 1.5px solid #e2e8f0; width: 100%;">
+        </div>
+    </div>
+    
     <div class="table-responsive">
         <?php if (empty($siswa_grades)): ?>
             <div style="padding: 40px; text-align: center; color: var(--text-muted);">
@@ -424,14 +487,15 @@ try {
             <table class="table-admin">
                 <thead>
                     <tr>
-                        <th style="width: 60px; text-align: center;">No</th>
+                        <th style="width: 50px; text-align: center;">No</th>
                         <th>Nama Lengkap</th>
                         <th>Kelas</th>
                         <th style="text-align: center;">Total Setoran</th>
-                        <th style="text-align: center;">A / A-</th>
-                        <th style="text-align: center;">B+ / B / B-</th>
-                        <th style="text-align: center;">C+ / C</th>
-                        <th style="text-align: center;">D</th>
+                        <th style="text-align: center; color: #16a34a;">Sangat Lancar</th>
+                        <th style="text-align: center; color: #0d5c34;">Lancar Terbata-Bata</th>
+                        <th style="text-align: center; color: #ca8a04;">Lancar dengan Bantuan</th>
+                        <th style="text-align: center; color: #dc2626;">Tidak Lancar / Ulangi</th>
+                        <th style="text-align: center;">Rata-rata Skor</th>
                         <th style="text-align: center;">Predikat Kelancaran</th>
                         <th style="text-align: center; width: 180px;">Aksi</th>
                     </tr>
@@ -441,13 +505,13 @@ try {
                     $no = 1;
                     foreach ($siswa_grades as $row): 
                         $pred_style = '';
-                        if (strpos($row['predikat'], '(A)') !== false || strpos($row['predikat'], '(A-)') !== false) {
+                        if (strpos($row['predikat'], 'Sangat Lancar') !== false) {
                             $pred_style = 'color: #16a34a; font-weight: 700;';
-                        } elseif (strpos($row['predikat'], '(B') !== false) {
-                            $pred_style = 'color: #2563eb; font-weight: 700;';
-                        } elseif (strpos($row['predikat'], '(C') !== false) {
+                        } elseif (strpos($row['predikat'], 'Lancar Terbata-Bata') !== false) {
+                            $pred_style = 'color: #0d5c34; font-weight: 700;';
+                        } elseif (strpos($row['predikat'], 'Lancar dengan Bantuan') !== false) {
                             $pred_style = 'color: #ca8a04; font-weight: 700;';
-                        } elseif (strpos($row['predikat'], '(D') !== false) {
+                        } elseif (strpos($row['predikat'], 'Tidak Lancar / Ulangi') !== false) {
                             $pred_style = 'color: #dc2626; font-weight: 700;';
                         } else {
                             $pred_style = 'color: var(--text-muted);';
@@ -462,13 +526,16 @@ try {
                             <td><?php echo htmlspecialchars($row['kelas']); ?></td>
                             <td style="text-align: center; font-weight: bold;"><?php echo $row['total_setoran']; ?></td>
                             
-                            <td style="text-align: center; color: #16a34a; font-weight: 600;"><?php echo $row['breakdown']['A']; ?></td>
-                            <td style="text-align: center; color: #2563eb; font-weight: 600;"><?php echo $row['breakdown']['B']; ?></td>
-                            <td style="text-align: center; color: #ca8a04; font-weight: 600;"><?php echo $row['breakdown']['C']; ?></td>
-                            <td style="text-align: center; color: #dc2626; font-weight: 600;"><?php echo $row['breakdown']['D']; ?></td>
+                            <td style="text-align: center; color: #16a34a; font-weight: 600;"><?php echo $row['breakdown']['Sangat Lancar']; ?></td>
+                            <td style="text-align: center; color: #0d5c34; font-weight: 600;"><?php echo $row['breakdown']['Lancar Terbata-Bata']; ?></td>
+                            <td style="text-align: center; color: #ca8a04; font-weight: 600;"><?php echo $row['breakdown']['Lancar dengan Bantuan']; ?></td>
+                            <td style="text-align: center; color: #dc2626; font-weight: 600;"><?php echo $row['breakdown']['Tidak Lancar / Ulangi']; ?></td>
                             
+                            <td style="text-align: center; font-weight: bold; color: var(--primary-color);">
+                                <?php echo $row['total_setoran'] > 0 ? number_format($row['avg_score'], 1) : '-'; ?>
+                            </td>
                             <td style="text-align: center; <?php echo $pred_style; ?>">
-                                <?php echo $row['predikat']; ?>
+                                <?php echo htmlspecialchars($row['predikat'] !== 'Belum Dinilai' ? formatGrade($row['predikat'], $row['avg_score']) : $row['predikat']); ?>
                             </td>
                             
                             <td style="text-align: center;">
@@ -492,5 +559,26 @@ try {
 </main>
 </div>
 </div>
+<script>
+function filterNilaiTable() {
+    var searchVal = document.getElementById('search_nilai_input').value.toLowerCase();
+    var table = document.querySelector('.table-admin');
+    if (!table) return;
+    var rows = table.querySelectorAll('tbody tr');
+    
+    rows.forEach(function(row) {
+        // Name is in second column (index 1)
+        var nameCell = row.cells[1];
+        if (nameCell) {
+            var name = nameCell.querySelector('strong') ? nameCell.querySelector('strong').innerText.toLowerCase() : nameCell.innerText.toLowerCase();
+            if (name.includes(searchVal)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    });
+}
+</script>
 </body>
 </html>

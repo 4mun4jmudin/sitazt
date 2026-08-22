@@ -13,6 +13,123 @@ try {
     // Abaikan jika sudah ada
 }
 
+$quran_surahs = [
+    ["no" => 1, "name" => "Al-Fatihah", "verses" => 7],
+    ["no" => 2, "name" => "Al-Baqarah", "verses" => 286],
+    ["no" => 3, "name" => "Ali 'Imran", "verses" => 200],
+    ["no" => 4, "name" => "An-Nisa'", "verses" => 176],
+    ["no" => 5, "name" => "Al-Ma'idah", "verses" => 120],
+    ["no" => 6, "name" => "Al-An'am", "verses" => 165],
+    ["no" => 7, "name" => "Al-A'raf", "verses" => 206],
+    ["no" => 8, "name" => "Al-Anfal", "verses" => 75],
+    ["no" => 9, "name" => "At-Taubah", "verses" => 129],
+    ["no" => 10, "name" => "Yunus", "verses" => 109],
+    ["no" => 11, "name" => "Hud", "verses" => 123],
+    ["no" => 12, "name" => "Yusuf", "verses" => 111],
+    ["no" => 13, "name" => "Ar-Ra'd", "verses" => 43],
+    ["no" => 14, "name" => "Ibrahim", "verses" => 52],
+    ["no" => 15, "name" => "Al-Hijr", "verses" => 99],
+    ["no" => 16, "name" => "An-Nahl", "verses" => 128],
+    ["no" => 17, "name" => "Al-Isra'", "verses" => 111],
+    ["no" => 18, "name" => "Al-Kahf", "verses" => 110],
+    ["no" => 19, "name" => "Maryam", "verses" => 98],
+    ["no" => 20, "name" => "Ta-Ha", "verses" => 135],
+    ["no" => 21, "name" => "Al-Anbiya'", "verses" => 112],
+    ["no" => 22, "name" => "Al-Hajj", "verses" => 78],
+    ["no" => 23, "name" => "Al-Mu'minun", "verses" => 118],
+    ["no" => 24, "name" => "An-Nur", "verses" => 64],
+    ["no" => 25, "name" => "Al-Furqan", "verses" => 77],
+    ["no" => 26, "name" => "Asy-Syu'ara'", "verses" => 227],
+    ["no" => 27, "name" => "An-Naml", "verses" => 93],
+    ["no" => 28, "name" => "Al-Qasas", "verses" => 88],
+    ["no" => 29, "name" => "Al-'Ankabut", "verses" => 69],
+    ["no" => 30, "name" => "Ar-Rum", "verses" => 60],
+    ["no" => 31, "name" => "Luqman", "verses" => 34],
+    ["no" => 32, "name" => "As-Sajdah", "verses" => 30],
+    ["no" => 33, "name" => "Al-Ahzab", "verses" => 73],
+    ["no" => 34, "name" => "Saba'", "verses" => 54],
+    ["no" => 35, "name" => "Fatir", "verses" => 45],
+    ["no" => 36, "name" => "Ya-Sin", "verses" => 83],
+    ["no" => 37, "name" => "As-Saffat", "verses" => 182],
+    ["no" => 38, "name" => "Sad", "verses" => 88],
+    ["no" => 39, "name" => "Az-Zumar", "verses" => 75],
+    ["no" => 40, "name" => "Ghafir", "verses" => 85],
+    ["no" => 41, "name" => "Fussilat", "verses" => 54],
+    ["no" => 42, "name" => "Asy-Syura", "verses" => 53],
+    ["no" => 43, "name" => "Az-Zukhruf", "verses" => 89],
+    ["no" => 44, "name" => "Ad-Dukhan", "verses" => 59],
+    ["no" => 45, "name" => "Al-Jasiyah", "verses" => 37],
+    ["no" => 46, "name" => "Al-Ahqaf", "verses" => 35],
+    ["no" => 47, "name" => "Muhammad", "verses" => 38],
+    ["no" => 48, "name" => "Al-Fath", "verses" => 29],
+    ["no" => 49, "name" => "Al-Hujurat", "verses" => 18],
+    ["no" => 50, "name" => "Qaf", "verses" => 45],
+    ["no" => 51, "name" => "Az-Zariyat", "verses" => 60],
+    ["no" => 52, "name" => "At-Tur", "verses" => 49],
+    ["no" => 53, "name" => "An-Najm", "verses" => 62],
+    ["no" => 54, "name" => "Al-Qamar", "verses" => 55],
+    ["no" => 55, "name" => "Ar-Rahman", "verses" => 78],
+    ["no" => 56, "name" => "Al-Waqi'ah", "verses" => 96],
+    ["no" => 57, "name" => "Al-Hadid", "verses" => 29],
+    ["no" => 58, "name" => "Al-Mujadilah", "verses" => 22],
+    ["no" => 59, "name" => "Al-Hasyr", "verses" => 24],
+    ["no" => 60, "name" => "Al-Mumtahanah", "verses" => 13],
+    ["no" => 61, "name" => "As-Saff", "verses" => 14],
+    ["no" => 62, "name" => "Al-Jumu'ah", "verses" => 11],
+    ["no" => 63, "name" => "Al-Munafiqun", "verses" => 11],
+    ["no" => 64, "name" => "At-Taghabun", "verses" => 18],
+    ["no" => 65, "name" => "At-Talaq", "verses" => 12],
+    ["no" => 66, "name" => "At-Tahrim", "verses" => 12],
+    ["no" => 67, "name" => "Al-Mulk", "verses" => 30],
+    ["no" => 68, "name" => "Al-Qalam", "verses" => 52],
+    ["no" => 69, "name" => "Al-Haqqah", "verses" => 52],
+    ["no" => 70, "name" => "Al-Ma'arij", "verses" => 44],
+    ["no" => 71, "name" => "Nuh", "verses" => 28],
+    ["no" => 72, "name" => "Al-Jinn", "verses" => 28],
+    ["no" => 73, "name" => "Al-Muzzammil", "verses" => 20],
+    ["no" => 74, "name" => "Al-Muddassir", "verses" => 56],
+    ["no" => 75, "name" => "Al-Qiyamah", "verses" => 40],
+    ["no" => 76, "name" => "Al-Insan", "verses" => 31],
+    ["no" => 77, "name" => "Al-Mursalat", "verses" => 50],
+    ["no" => 78, "name" => "An-Naba'", "verses" => 40],
+    ["no" => 79, "name" => "An-Nazi'at", "verses" => 46],
+    ["no" => 80, "name" => "'Abasa", "verses" => 42],
+    ["no" => 81, "name" => "At-Takwir", "verses" => 29],
+    ["no" => 82, "name" => "Al-Infitar", "verses" => 19],
+    ["no" => 83, "name" => "Al-Mutaffifin", "verses" => 36],
+    ["no" => 84, "name" => "Al-Insyiqaq", "verses" => 25],
+    ["no" => 85, "name" => "Al-Buruj", "verses" => 22],
+    ["no" => 86, "name" => "At-Tariq", "verses" => 17],
+    ["no" => 87, "name" => "Al-A'la", "verses" => 19],
+    ["no" => 88, "name" => "Al-Ghasyiyah", "verses" => 26],
+    ["no" => 89, "name" => "Al-Fajr", "verses" => 30],
+    ["no" => 90, "name" => "Al-Balad", "verses" => 20],
+    ["no" => 91, "name" => "Asy-Syams", "verses" => 15],
+    ["no" => 92, "name" => "Al-Lail", "verses" => 21],
+    ["no" => 93, "name" => "Ad-Duha", "verses" => 11],
+    ["no" => 94, "name" => "Asy-Syarh", "verses" => 8],
+    ["no" => 95, "name" => "At-Tin", "verses" => 8],
+    ["no" => 96, "name" => "Al-'Alaq", "verses" => 19],
+    ["no" => 97, "name" => "Al-Qadr", "verses" => 5],
+    ["no" => 98, "name" => "Al-Bayyinah", "verses" => 8],
+    ["no" => 99, "name" => "Az-Zalzalah", "verses" => 8],
+    ["no" => 100, "name" => "Al-'Adiyat", "verses" => 11],
+    ["no" => 101, "name" => "Al-Qari'ah", "verses" => 11],
+    ["no" => 102, "name" => "At-Takasur", "verses" => 8],
+    ["no" => 103, "name" => "Al-'Asr", "verses" => 3],
+    ["no" => 104, "name" => "Al-Humazah", "verses" => 9],
+    ["no" => 105, "name" => "Al-Fil", "verses" => 5],
+    ["no" => 106, "name" => "Quraisy", "verses" => 4],
+    ["no" => 107, "name" => "Al-Ma'un", "verses" => 7],
+    ["no" => 108, "name" => "Al-Kausar", "verses" => 3],
+    ["no" => 109, "name" => "Al-Kafirun", "verses" => 6],
+    ["no" => 110, "name" => "An-Nasr", "verses" => 3],
+    ["no" => 111, "name" => "Al-Masad", "verses" => 5],
+    ["no" => 112, "name" => "Al-Ikhlas", "verses" => 4],
+    ["no" => 113, "name" => "Al-Falaq", "verses" => 5],
+    ["no" => 114, "name" => "An-Nas", "verses" => 6]
+];
+
 // 1. Ambil tahun ajaran aktif
 $ta_aktif = null;
 try {
@@ -382,23 +499,38 @@ if (isset($_GET['success'])) {
                     <label class="form-label" style="font-size: 13px; font-weight: 600;">Target Juz</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-book-open input-icon"></i>
-                        <input type="text" name="target_juz" value="<?php echo htmlspecialchars($selected_kelas_target['target_juz']); ?>" class="form-control" placeholder="Contoh: Juz 30">
+                        <select name="target_juz" id="massTargetJuz" class="form-control" onchange="onMassJuzChange()">
+                            <option value="">Pilih Juz</option>
+                            <?php for ($i = 1; $i <= 30; $i++): ?>
+                                <option value="Juz <?php echo $i; ?>" <?php echo ($selected_kelas_target['target_juz'] == "Juz $i" || $selected_kelas_target['target_juz'] == $i) ? 'selected' : ''; ?>>Juz <?php echo $i; ?></option>
+                            <?php endfor; ?>
+                        </select>
                     </div>
                 </div>
                 
                 <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label" style="font-size: 13px; font-weight: 600;">Target Surah</label>
-                    <div class="input-wrapper">
+                    <div class="input-wrapper" style="display: flex; gap: 8px; align-items: center;">
                         <i class="fa-solid fa-bookmark input-icon"></i>
-                        <input type="text" name="target_surah" value="<?php echo htmlspecialchars($selected_kelas_target['target_surah']); ?>" class="form-control" placeholder="Contoh: An-Naba s/d An-Nas">
+                        <select id="massTargetSurahMulai" class="form-control" onchange="onMassSurahMulaiChange()">
+                            <option value="">Pilih Surah Mulai</option>
+                        </select>
+                        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">s/d</span>
+                        <select id="massTargetSurahSelesai" class="form-control" style="padding-left: 16px;" onchange="onMassSurahSelesaiChange()">
+                            <option value="">Pilih Surah Selesai</option>
+                        </select>
+                        <input type="hidden" name="target_surah" id="massTargetSurah" value="<?php echo htmlspecialchars($selected_kelas_target['target_surah'] ?? ''); ?>">
+                        <input type="hidden" id="massTargetSurahHiddenVal" value="<?php echo htmlspecialchars($selected_kelas_target['target_surah'] ?? ''); ?>">
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 0;">
+                <div class="form-group" style="margin-bottom: 0;" id="massAyatGroup">
                     <label class="form-label" style="font-size: 13px; font-weight: 600;">Target Ayat</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-list-ol input-icon"></i>
-                        <input type="text" name="target_ayat" value="<?php echo htmlspecialchars($selected_kelas_target['target_ayat'] ?? ''); ?>" class="form-control" placeholder="Contoh: Ayat 1-40">
+                    <div class="input-wrapper" style="display: flex; gap: 8px; align-items: center;">
+                        <input type="number" id="massAyatMulai" class="form-control" placeholder="Mulai" style="width: 80px; padding-left: 10px;" min="1" oninput="validateMassAyatRange()">
+                        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">s/d</span>
+                        <input type="number" id="massAyatSelesai" class="form-control" placeholder="Selesai" style="width: 80px; padding-left: 10px;" min="1" oninput="validateMassAyatRange()">
+                        <input type="hidden" name="target_ayat" id="massTargetAyat" value="<?php echo htmlspecialchars($selected_kelas_target['target_ayat'] ?? ''); ?>">
                     </div>
                 </div>
             </div>
@@ -525,23 +657,37 @@ if (isset($_GET['success'])) {
                     <label class="form-label" for="target_juz">Target Juz</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-book-open input-icon"></i>
-                        <input type="text" name="target_juz" id="modalTargetJuz" class="form-control" placeholder="Contoh: Juz 30, Juz 29, atau 2 Juz">
+                        <select name="target_juz" id="modalTargetJuz" class="form-control" onchange="onModalJuzChange()">
+                            <option value="">Pilih Juz</option>
+                            <?php for ($i = 1; $i <= 30; $i++): ?>
+                                <option value="Juz <?php echo $i; ?>">Juz <?php echo $i; ?></option>
+                            <?php endfor; ?>
+                        </select>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label" for="target_surah">Target Surah</label>
-                    <div class="input-wrapper">
+                    <div class="input-wrapper" style="display: flex; gap: 8px; align-items: center;">
                         <i class="fa-solid fa-bookmark input-icon"></i>
-                        <input type="text" name="target_surah" id="modalTargetSurah" class="form-control" placeholder="Contoh: An-Naba s/d An-Nas">
+                        <select id="modalTargetSurahMulai" class="form-control" onchange="onModalSurahMulaiChange()">
+                            <option value="">Pilih Surah Mulai</option>
+                        </select>
+                        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">s/d</span>
+                        <select id="modalTargetSurahSelesai" class="form-control" style="padding-left: 16px;" onchange="onModalSurahSelesaiChange()">
+                            <option value="">Pilih Surah Selesai</option>
+                        </select>
+                        <input type="hidden" name="target_surah" id="modalTargetSurah">
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="modalAyatGroup">
                     <label class="form-label" for="target_ayat">Target Ayat</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-list-ol input-icon"></i>
-                        <input type="text" name="target_ayat" id="modalTargetAyat" class="form-control" placeholder="Contoh: Ayat 1-40">
+                    <div class="input-wrapper" style="display: flex; gap: 8px; align-items: center;">
+                        <input type="number" id="modalAyatMulai" class="form-control" placeholder="Mulai" style="width: 80px; padding-left: 10px;" min="1" oninput="validateModalAyatRange()">
+                        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">s/d</span>
+                        <input type="number" id="modalAyatSelesai" class="form-control" placeholder="Selesai" style="width: 80px; padding-left: 10px;" min="1" oninput="validateModalAyatRange()">
+                        <input type="hidden" name="target_ayat" id="modalTargetAyat">
                     </div>
                 </div>
                 
@@ -560,19 +706,428 @@ if (isset($_GET['success'])) {
 </div>
 
 <script>
+const quranSurahs = <?php echo json_encode($quran_surahs); ?>;
+
+const juzToSurahs = {
+    1: [1, 2],
+    2: [2],
+    3: [2, 3],
+    4: [3, 4],
+    5: [4],
+    6: [4, 5],
+    7: [5, 6],
+    8: [6, 7],
+    9: [7, 8],
+    10: [8, 9],
+    11: [9, 10, 11],
+    12: [11, 12],
+    13: [12, 13, 14],
+    14: [15, 16],
+    15: [17, 18],
+    16: [18, 19, 20],
+    17: [21, 22],
+    18: [23, 24, 25],
+    19: [25, 26, 27],
+    20: [27, 28, 29],
+    21: [29, 30, 31, 32, 33],
+    22: [33, 34, 35, 36],
+    23: [36, 37, 38, 39],
+    24: [39, 40, 41],
+    25: [41, 42, 43, 44, 45],
+    26: [46, 47, 48, 49, 50, 51],
+    27: [51, 52, 53, 54, 55, 56, 57],
+    28: [58, 59, 60, 61, 62, 63, 64, 65, 66],
+    29: [67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77],
+    30: [78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114]
+};
+
+function parseSurahRange(surahStr) {
+    if (!surahStr) return { mulai: '', selesai: '' };
+    const parts = surahStr.split(/\s+s\/d\s+/i);
+    if (parts.length === 2) {
+        return { mulai: parts[0].trim(), selesai: parts[1].trim() };
+    } else {
+        return { mulai: surahStr.trim(), selesai: surahStr.trim() };
+    }
+}
+
+function parseAyatRange(ayatStr) {
+    if (!ayatStr) return { mulai: '', selesai: '' };
+    ayatStr = ayatStr.replace(/ayat/i, '').trim();
+    const parts = ayatStr.split('-');
+    if (parts.length === 2) {
+        return { mulai: parseInt(parts[0]) || '', selesai: parseInt(parts[1]) || '' };
+    } else if (parts.length === 1 && parts[0]) {
+        const val = parseInt(parts[0]);
+        return { mulai: val || '', selesai: val || '' };
+    }
+    return { mulai: '', selesai: '' };
+}
+
+function populateSurahDropdowns(prefix, selectedJuz, currentSelectedMulai, currentSelectedSelesai) {
+    const selectMulai = document.getElementById(prefix + 'SurahMulai');
+    const selectSelesai = document.getElementById(prefix + 'SurahSelesai');
+    if (!selectMulai || !selectSelesai) return;
+    
+    const valMulaiToKeep = currentSelectedMulai || selectMulai.value;
+    const valSelesaiToKeep = currentSelectedSelesai || selectSelesai.value;
+    
+    selectMulai.innerHTML = '<option value="">Pilih Surah Mulai</option>';
+    selectSelesai.innerHTML = '<option value="">Pilih Surah Selesai</option>';
+    
+    let allowedNos = null;
+    if (selectedJuz) {
+        const juzNum = parseInt(selectedJuz.replace(/juz/i, '').trim());
+        allowedNos = juzToSurahs[juzNum] || null;
+    }
+    
+    quranSurahs.forEach(surah => {
+        if (!allowedNos || allowedNos.includes(surah.no)) {
+            const opt = document.createElement('option');
+            opt.value = surah.name;
+            opt.setAttribute('data-no', surah.no);
+            opt.setAttribute('data-verses', surah.verses);
+            opt.textContent = surah.no + '. ' + surah.name + ' (' + surah.verses + ' Ayat)';
+            if (surah.name === valMulaiToKeep) {
+                opt.selected = true;
+            }
+            selectMulai.appendChild(opt);
+        }
+    });
+    
+    updateSelesaiDropdown(prefix, selectedJuz, valSelesaiToKeep);
+}
+
+function updateSelesaiDropdown(prefix, selectedJuz, valSelesaiToKeep) {
+    const selectMulai = document.getElementById(prefix + 'SurahMulai');
+    const selectSelesai = document.getElementById(prefix + 'SurahSelesai');
+    if (!selectMulai || !selectSelesai) return;
+    
+    const selectedMulaiOption = selectMulai.options[selectMulai.selectedIndex];
+    const startSurahNum = selectedMulaiOption ? parseInt(selectedMulaiOption.getAttribute('data-no')) || 0 : 0;
+    
+    const currentValSelesai = valSelesaiToKeep || selectSelesai.value;
+    selectSelesai.innerHTML = '<option value="">Pilih Surah Selesai</option>';
+    
+    let allowedNos = null;
+    if (selectedJuz) {
+        const juzNum = parseInt(selectedJuz.replace(/juz/i, '').trim());
+        allowedNos = juzToSurahs[juzNum] || null;
+    }
+    
+    quranSurahs.forEach(surah => {
+        const matchJuz = !allowedNos || allowedNos.includes(surah.no);
+        const matchStart = !startSurahNum || surah.no >= startSurahNum;
+        
+        if (matchJuz && matchStart) {
+            const opt = document.createElement('option');
+            opt.value = surah.name;
+            opt.setAttribute('data-no', surah.no);
+            opt.setAttribute('data-verses', surah.verses);
+            opt.textContent = surah.no + '. ' + surah.name + ' (' + surah.verses + ' Ayat)';
+            if (surah.name === currentValSelesai) {
+                opt.selected = true;
+            }
+            selectSelesai.appendChild(opt);
+        }
+    });
+}
+
 function openTargetModal(siswaId, siswaName, targetJuz, targetSurah, targetAyat, keterangan) {
     document.getElementById('modalSiswaId').value = siswaId;
     document.getElementById('modalSiswaName').innerText = siswaName;
-    document.getElementById('modalTargetJuz').value = targetJuz;
+    
+    let normalizedJuz = '';
+    if (targetJuz) {
+        if (targetJuz.toLowerCase().includes('juz')) {
+            normalizedJuz = targetJuz.charAt(0).toUpperCase() + targetJuz.slice(1).toLowerCase();
+        } else {
+            normalizedJuz = 'Juz ' + targetJuz.trim();
+        }
+    }
+    document.getElementById('modalTargetJuz').value = normalizedJuz;
+    
+    // Parse range of Surahs
+    const surahRange = parseSurahRange(targetSurah);
+    populateSurahDropdowns('modalTarget', normalizedJuz, surahRange.mulai, surahRange.selesai);
+    
     document.getElementById('modalTargetSurah').value = targetSurah;
-    document.getElementById('modalTargetAyat').value = targetAyat;
     document.getElementById('modalKeterangan').value = keterangan;
+    
+    const range = parseAyatRange(targetAyat);
+    document.getElementById('modalAyatMulai').value = range.mulai;
+    document.getElementById('modalAyatSelesai').value = range.selesai;
+    document.getElementById('modalTargetAyat').value = targetAyat;
+    
+    updateModalAyatLimit();
     document.getElementById('targetModal').classList.add('show');
 }
 
 function closeTargetModal() {
     document.getElementById('targetModal').classList.remove('show');
 }
+
+function onModalJuzChange() {
+    const juzVal = document.getElementById('modalTargetJuz').value;
+    populateSurahDropdowns('modalTarget', juzVal);
+    updateModalSurahHidden();
+    updateModalAyatLimit();
+}
+
+function onModalSurahMulaiChange() {
+    const selectMulai = document.getElementById('modalTargetSurahMulai');
+    const juzVal = document.getElementById('modalTargetJuz').value;
+    
+    updateSelesaiDropdown('modalTarget', juzVal);
+    
+    const selectSelesai = document.getElementById('modalTargetSurahSelesai');
+    if (!selectSelesai.value) {
+        selectSelesai.value = selectMulai.value;
+    }
+    
+    updateModalSurahHidden();
+    updateModalAyatLimit();
+}
+
+function onModalSurahSelesaiChange() {
+    updateModalSurahHidden();
+    updateModalAyatLimit();
+}
+
+function updateModalSurahHidden() {
+    const mulai = document.getElementById('modalTargetSurahMulai').value;
+    const selesai = document.getElementById('modalTargetSurahSelesai').value;
+    const hidden = document.getElementById('modalTargetSurah');
+    
+    if (mulai && selesai) {
+        hidden.value = mulai === selesai ? mulai : mulai + ' s/d ' + selesai;
+    } else if (mulai) {
+        hidden.value = mulai;
+    } else {
+        hidden.value = '';
+    }
+}
+
+// Modal fields logic
+function updateModalAyatLimit() {
+    const selectMulai = document.getElementById('modalTargetSurahMulai').value;
+    const selectSelesai = document.getElementById('modalTargetSurahSelesai').value;
+    const group = document.getElementById('modalAyatGroup');
+    const hidden = document.getElementById('modalTargetAyat');
+    
+    if (selectMulai && selectSelesai && selectMulai !== selectSelesai) {
+        // Hide target ayat group if multiple surahs are selected
+        group.style.display = 'none';
+        hidden.value = '';
+        document.getElementById('modalAyatMulai').value = '';
+        document.getElementById('modalAyatSelesai').value = '';
+        return;
+    }
+    
+    // Show target ayat group if single surah is selected (or none)
+    group.style.display = 'block';
+    
+    const select = document.getElementById('modalTargetSurahMulai');
+    const selectedOption = select.options[select.selectedIndex];
+    const maxVerses = selectedOption ? selectedOption.getAttribute('data-verses') : null;
+    
+    const mulaiInput = document.getElementById('modalAyatMulai');
+    const selesaiInput = document.getElementById('modalAyatSelesai');
+    
+    if (maxVerses) {
+        mulaiInput.max = maxVerses;
+        selesaiInput.max = maxVerses;
+        
+        if (!mulaiInput.value) mulaiInput.value = 1;
+        if (!selesaiInput.value) selesaiInput.value = maxVerses;
+        
+        if (parseInt(mulaiInput.value) > parseInt(maxVerses)) mulaiInput.value = maxVerses;
+        if (parseInt(selesaiInput.value) > parseInt(maxVerses)) selesaiInput.value = maxVerses;
+    } else {
+        mulaiInput.removeAttribute('max');
+        selesaiInput.removeAttribute('max');
+    }
+    updateModalTargetAyatHidden();
+}
+
+function validateModalAyatRange() {
+    const select = document.getElementById('modalTargetSurahMulai');
+    const selectedOption = select.options[select.selectedIndex];
+    const maxVerses = selectedOption ? (parseInt(selectedOption.getAttribute('data-verses')) || 0) : 0;
+    
+    const mulaiInput = document.getElementById('modalAyatMulai');
+    const selesaiInput = document.getElementById('modalAyatSelesai');
+    
+    let mulai = parseInt(mulaiInput.value) || 0;
+    let selesai = parseInt(selesaiInput.value) || 0;
+    
+    if (maxVerses > 0) {
+        if (mulai > maxVerses) {
+            mulaiInput.value = maxVerses;
+            mulai = maxVerses;
+        }
+        if (selesai > maxVerses) {
+            selesaiInput.value = maxVerses;
+            selesai = maxVerses;
+        }
+    }
+    
+    if (mulai > 0 && selesai > 0 && mulai > selesai) {
+        selesaiInput.value = mulai;
+    }
+    
+    updateModalTargetAyatHidden();
+}
+
+function updateModalTargetAyatHidden() {
+    const mulai = document.getElementById('modalAyatMulai').value;
+    const selesai = document.getElementById('modalAyatSelesai').value;
+    const hidden = document.getElementById('modalTargetAyat');
+    
+    if (mulai && selesai) {
+        hidden.value = mulai === selesai ? mulai : mulai + '-' + selesai;
+    } else if (mulai) {
+        hidden.value = mulai;
+    } else {
+        hidden.value = '';
+    }
+}
+
+function onMassJuzChange() {
+    const juzVal = document.getElementById('massTargetJuz').value;
+    populateSurahDropdowns('massTarget', juzVal);
+    updateMassSurahHidden();
+    updateMassAyatLimit();
+}
+
+function onMassSurahMulaiChange() {
+    const selectMulai = document.getElementById('massTargetSurahMulai');
+    const juzVal = document.getElementById('massTargetJuz').value;
+    
+    updateSelesaiDropdown('massTarget', juzVal);
+    
+    const selectSelesai = document.getElementById('massTargetSurahSelesai');
+    if (!selectSelesai.value) {
+        selectSelesai.value = selectMulai.value;
+    }
+    
+    updateMassSurahHidden();
+    updateMassAyatLimit();
+}
+
+function onMassSurahSelesaiChange() {
+    updateMassSurahHidden();
+    updateMassAyatLimit();
+}
+
+function updateMassSurahHidden() {
+    const mulai = document.getElementById('massTargetSurahMulai').value;
+    const selesai = document.getElementById('massTargetSurahSelesai').value;
+    const hidden = document.getElementById('massTargetSurah');
+    
+    if (mulai && selesai) {
+        hidden.value = mulai === selesai ? mulai : mulai + ' s/d ' + selesai;
+    } else if (mulai) {
+        hidden.value = mulai;
+    } else {
+        hidden.value = '';
+    }
+}
+
+// Mass fields logic
+function updateMassAyatLimit() {
+    const selectMulai = document.getElementById('massTargetSurahMulai').value;
+    const selectSelesai = document.getElementById('massTargetSurahSelesai').value;
+    const group = document.getElementById('massAyatGroup');
+    const hidden = document.getElementById('massTargetAyat');
+    
+    if (selectMulai && selectSelesai && selectMulai !== selectSelesai) {
+        // Hide target ayat group if multiple surahs are selected
+        group.style.display = 'none';
+        hidden.value = '';
+        document.getElementById('massAyatMulai').value = '';
+        document.getElementById('massAyatSelesai').value = '';
+        return;
+    }
+    
+    // Show target ayat group if single surah is selected (or none)
+    group.style.display = 'block';
+    
+    const select = document.getElementById('massTargetSurahMulai');
+    const selectedOption = select.options[select.selectedIndex];
+    const maxVerses = selectedOption ? selectedOption.getAttribute('data-verses') : null;
+    
+    const mulaiInput = document.getElementById('massAyatMulai');
+    const selesaiInput = document.getElementById('massAyatSelesai');
+    
+    if (maxVerses) {
+        mulaiInput.max = maxVerses;
+        selesaiInput.max = maxVerses;
+        
+        if (!mulaiInput.value) mulaiInput.value = 1;
+        if (!selesaiInput.value) selesaiInput.value = maxVerses;
+        
+        if (parseInt(mulaiInput.value) > parseInt(maxVerses)) mulaiInput.value = maxVerses;
+        if (parseInt(selesaiInput.value) > parseInt(maxVerses)) selesaiInput.value = maxVerses;
+    } else {
+        mulaiInput.removeAttribute('max');
+        selesaiInput.removeAttribute('max');
+    }
+    updateMassTargetAyatHidden();
+}
+
+function validateMassAyatRange() {
+    const select = document.getElementById('massTargetSurahMulai');
+    const selectedOption = select.options[select.selectedIndex];
+    const maxVerses = selectedOption ? (parseInt(selectedOption.getAttribute('data-verses')) || 0) : 0;
+    
+    const mulaiInput = document.getElementById('massAyatMulai');
+    const selesaiInput = document.getElementById('massAyatSelesai');
+    
+    let mulai = parseInt(mulaiInput.value) || 0;
+    let selesai = parseInt(selesaiInput.value) || 0;
+    
+    if (maxVerses > 0) {
+        if (mulai > maxVerses) {
+            mulaiInput.value = maxVerses;
+            mulai = maxVerses;
+        }
+        if (selesai > maxVerses) {
+            selesaiInput.value = maxVerses;
+            selesai = maxVerses;
+        }
+    }
+    
+    if (mulai > 0 && selesai > 0 && mulai > selesai) {
+        selesaiInput.value = mulai;
+    }
+    
+    updateMassTargetAyatHidden();
+}
+
+function updateMassTargetAyatHidden() {
+    const mulai = document.getElementById('massAyatMulai').value;
+    const selesai = document.getElementById('massAyatSelesai').value;
+    const hidden = document.getElementById('massTargetAyat');
+    
+    if (mulai && selesai) {
+        hidden.value = mulai === selesai ? mulai : mulai + '-' + selesai;
+    } else if (mulai) {
+        hidden.value = mulai;
+    } else {
+        hidden.value = '';
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const juzVal = document.getElementById('massTargetJuz').value;
+    const initialSurahVal = document.getElementById('massTargetSurahHiddenVal').value;
+    
+    const surahRange = parseSurahRange(initialSurahVal);
+    populateSurahDropdowns('massTarget', juzVal, surahRange.mulai, surahRange.selesai);
+    
+    updateMassAyatLimit();
+});
 </script>
 
 </main>

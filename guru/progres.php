@@ -332,44 +332,7 @@ try {
                 </div>
             </div>
             
-            <!-- Filter Progres (Periode / Surah) -->
-            <div class="card" style="box-shadow: none; border: 1px solid rgba(13, 92, 52, 0.1); padding: 20px; margin-bottom: 25px; background-color: #f8fafc; border-radius: 12px;">
-                <h3 style="font-family: var(--font-heading); color: var(--primary-dark); font-size: 14px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-filter"></i> Filter Data Progres
-                </h3>
-                <form method="GET" action="progres.php" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
-                    <input type="hidden" name="siswa_id" value="<?php echo $selected_siswa_id; ?>">
-                    
-                    <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
-                        <label class="form-label" style="font-size: 12px; font-weight: 600; margin-bottom: 5px; display: block;">Mulai Tanggal</label>
-                        <input type="date" name="tgl_mulai" value="<?php echo htmlspecialchars($filter_tgl_mulai); ?>" class="form-control" style="font-size: 13px; padding: 8px; width: 100%;">
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
-                        <label class="form-label" style="font-size: 12px; font-weight: 600; margin-bottom: 5px; display: block;">Sampai Tanggal</label>
-                        <input type="date" name="tgl_selesai" value="<?php echo htmlspecialchars($filter_tgl_selesai); ?>" class="form-control" style="font-size: 13px; padding: 8px; width: 100%;">
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 0; flex: 1.5; min-width: 200px;">
-                        <label class="form-label" style="font-size: 12px; font-weight: 600; margin-bottom: 5px; display: block;">Nama Surah</label>
-                        <div class="input-wrapper" style="position: relative;">
-                            <i class="fa-solid fa-magnifying-glass input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px;"></i>
-                            <input type="text" name="surah" value="<?php echo htmlspecialchars($filter_surah); ?>" class="form-control" placeholder="Contoh: An-Naba" style="font-size: 13px; padding: 8px 12px 8px 35px; width: 100%;">
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 8px; height: 38px;">
-                        <button type="submit" class="btn btn-primary btn-sm" style="width: auto; padding: 0 16px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-family: var(--font-body);">
-                            <i class="fa-solid fa-filter"></i> Filter
-                        </button>
-                        <?php if ($filter_tgl_mulai !== '' || $filter_tgl_selesai !== '' || $filter_surah !== ''): ?>
-                            <a href="progres.php?siswa_id=<?php echo $selected_siswa_id; ?>" class="btn btn-secondary btn-sm" style="width: auto; padding: 0 16px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 500; font-family: var(--font-body);">
-                                <i class="fa-solid fa-rotate-left"></i> Reset
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                </form>
-            </div>
+
             
             <!-- Tabel Riwayat Progres Lengkap -->
             <div class="admin-card-table" style="box-shadow: none; border: 1px solid rgba(13, 92, 52, 0.1);">
@@ -390,7 +353,8 @@ try {
                                     <th>Tanggal</th>
                                     <th>Kategori</th>
                                     <th>Surah & Ayat</th>
-                                    <th style="text-align: center;">Nilai</th>
+                                    <th style="text-align: center;">Skor Angka</th>
+                                    <th style="text-align: center;">Predikat</th>
                                     <th>Catatan Guru</th>
                                     <th>Guru Penguji</th>
                                 </tr>
@@ -404,13 +368,13 @@ try {
                                         ? 'background-color: rgba(13, 92, 52, 0.06); color: var(--primary-color);' 
                                         : 'background-color: rgba(59, 130, 246, 0.06); color: #1d4ed8;';
                                     
-                                    $nilai = strtoupper($setoran['nilai']);
-                                    if ($nilai === 'A+' || $nilai === 'A' || $nilai === 'A-') {
+                                    $nilai = trim($setoran['nilai']);
+                                    if (strcasecmp($nilai, 'Sangat Lancar') === 0) {
                                         $nilai_class = 'background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;';
-                                    } elseif ($nilai === 'B+' || $nilai === 'B' || $nilai === 'B-') {
-                                        $nilai_class = 'background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;';
-                                    } elseif ($nilai === 'C+' || $nilai === 'C') {
+                                    } elseif (strcasecmp($nilai, 'Lancar Terbata-Bata') === 0) {
                                         $nilai_class = 'background-color: #fefce8; color: #854d0e; border: 1px solid #fef08a;';
+                                    } elseif (strcasecmp($nilai, 'Lancar dengan Bantuan') === 0) {
+                                        $nilai_class = 'background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;';
                                     } else {
                                         $nilai_class = 'background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;';
                                     }
@@ -429,8 +393,11 @@ try {
                                                 Ayat <?php echo $setoran['ayat_mulai']; ?> - <?php echo $setoran['ayat_selesai']; ?>
                                             </div>
                                         </td>
+                                        <td style="text-align: center; font-weight: bold; color: var(--primary-color);">
+                                            <?php echo htmlspecialchars($setoran['nilai_angka'] ?? '-'); ?>
+                                        </td>
                                         <td style="text-align: center;">
-                                            <span style="display: inline-block; width: 28px; height: 28px; line-height: 26px; text-align: center; border-radius: 50%; font-weight: bold; font-size: 12px; <?php echo $nilai_class; ?>">
+                                            <span style="display: inline-block; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; line-height: normal; <?php echo $nilai_class; ?>">
                                                 <?php echo htmlspecialchars($setoran['nilai']); ?>
                                             </span>
                                         </td>

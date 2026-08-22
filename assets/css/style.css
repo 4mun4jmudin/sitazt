@@ -792,9 +792,10 @@ body::after {
     backdrop-filter: blur(4px);
     display: none;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Align to top to allow scroll down */
     z-index: 100;
-    padding: 20px;
+    padding: 40px 20px; /* Padding top & bottom for spacing when scrolling */
+    overflow-y: auto; /* Enable scrollbar if content is taller than viewport */
 }
 
 .modal-overlay.show {
@@ -809,6 +810,7 @@ body::after {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     overflow: hidden;
     animation: slideInDown 0.25s ease-out;
+    margin: auto; /* Standard vertical flex spacing helper */
 }
 
 .admin-modal-large {

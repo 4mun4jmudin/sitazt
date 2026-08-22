@@ -2,10 +2,38 @@
 // guru/sertifikat.php
 require_once '../config/database.php';
 
+// Migrasi DB: Tambahkan catatan jika belum ada
+try {
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN catatan TEXT NULL AFTER predikat");
+} catch (\PDOException $e) {
+    // Abaikan jika sudah ada
+}
+try {
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN nama_kepsek VARCHAR(150) NULL AFTER catatan");
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN nip_kepsek VARCHAR(50) NULL AFTER nama_kepsek");
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN nama_guru_ttd VARCHAR(150) NULL AFTER nip_kepsek");
+    $pdo->exec("ALTER TABLE sertifikat ADD COLUMN nip_guru_ttd VARCHAR(50) NULL AFTER nama_guru_ttd");
+} catch (\PDOException $e) {
+    // Abaikan jika sudah ada
+}
+try {
+    $stmt_check_old_cert = $pdo->query("SELECT COUNT(*) FROM sertifikat WHERE predikat IN ('Mumtaz', 'Jayyid Jiddan', 'Jayyid', 'Maqbul', 'Dhaif')");
+    if ($stmt_check_old_cert && $stmt_check_old_cert->fetchColumn() > 0) {
+        $pdo->exec("UPDATE sertifikat SET predikat = 'Sangat Lancar' WHERE predikat = 'Mumtaz'");
+        $pdo->exec("UPDATE sertifikat SET predikat = 'Lancar Terbata-Bata' WHERE predikat IN ('Jayyid Jiddan', 'Jayyid')");
+        $pdo->exec("UPDATE sertifikat SET predikat = 'Lancar dengan Bantuan' WHERE predikat = 'Maqbul'");
+        $pdo->exec("UPDATE sertifikat SET predikat = 'Tidak Lancar / Ulangi' WHERE predikat = 'Dhaif'");
+    }
+} catch (\PDOException $e) {
+    // Abaikan jika gagal
+}
+
 $print_cert_id = intval($_GET['print_cert_id'] ?? 0);
 if ($print_cert_id > 0) {
     // Jalankan tampilan cetak sertifikat
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'guru_tahfidz') {
         die("Akses ditolak.");
     }
@@ -51,12 +79,12 @@ if ($print_cert_id > 0) {
             }
             .certificate-wrapper {
                 width: 900px;
-                height: 620px;
+                height: 680px;
                 background-color: #ffffff;
                 box-shadow: 0 15px 35px rgba(0,0,0,0.1);
                 border-radius: 8px;
                 position: relative;
-                padding: 40px;
+                padding: 25px;
                 box-sizing: border-box;
                 overflow: hidden;
             }
@@ -75,7 +103,7 @@ if ($print_cert_id > 0) {
                 border: 4px double #ffd700; /* Gold */
                 box-sizing: border-box;
                 position: relative;
-                padding: 20px 40px;
+                padding: 10px 45px;
             }
             /* Corner ornaments using pure CSS */
             .corner-ornament {
@@ -90,25 +118,64 @@ if ($print_cert_id > 0) {
             .bottom-left { bottom: -10px; left: -10px; border-right: none; border-top: none; }
             .bottom-right { bottom: -10px; right: -10px; border-left: none; border-top: none; }
             
-            .header-logo {
-                text-align: center;
-                margin-bottom: 20px;
+            .kop-surat-cert {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-bottom: 2px solid #0d5c34;
+                padding-bottom: 8px;
+                margin-bottom: 15px;
+                gap: 15px;
             }
-            .school-name {
-                font-family: 'Cinzel', serif;
-                font-size: 18px;
-                font-weight: 700;
-                color: #0d5c34;
-                letter-spacing: 2px;
-                margin-top: 5px;
+            .kop-logo-cert img {
+                height: 55px;
+            }
+            .kop-text-cert {
+                text-align: center;
+            }
+            .kop-text-cert h2 {
+                margin: 0;
+                font-size: 12px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text-cert h1 {
+                margin: 1px 0;
+                font-size: 14px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text-cert h3 {
+                margin: 1px 0;
+                font-size: 10px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text-cert p {
+                margin: 1px 0;
+                font-size: 9px;
+                font-weight: bold;
+                color: #000000;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .kop-text-cert p.email {
+                margin-top: 2px;
+                font-size: 9px;
+            }
+            .kop-text-cert p.email a {
+                color: #0000ff;
+                text-decoration: underline;
             }
             .cert-title {
                 font-family: 'Cinzel', serif;
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: 800;
                 color: #ccab00; /* Goldish */
                 text-align: center;
-                margin: 15px 0 5px 0;
+                margin: 8px 0 2px 0;
                 letter-spacing: 4px;
                 text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             }
@@ -118,7 +185,7 @@ if ($print_cert_id > 0) {
                 text-transform: uppercase;
                 letter-spacing: 3px;
                 color: #64748b;
-                margin-bottom: 30px;
+                margin-bottom: 10px;
                 font-weight: 600;
             }
             .cert-body {
@@ -129,9 +196,9 @@ if ($print_cert_id > 0) {
             }
             .student-name {
                 font-family: 'Great Vibes', cursive;
-                font-size: 44px;
+                font-size: 38px;
                 color: #073b20;
-                margin: 10px 0;
+                margin: 4px 0;
                 display: block;
                 font-weight: 400;
             }
@@ -142,7 +209,7 @@ if ($print_cert_id > 0) {
                 padding: 4px 20px;
                 border-radius: 30px;
                 font-weight: 700;
-                margin-top: 15px;
+                margin-top: 8px;
                 font-size: 14px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
@@ -151,7 +218,7 @@ if ($print_cert_id > 0) {
             .signature-section {
                 display: flex;
                 justify-content: space-between;
-                margin-top: 45px;
+                margin-top: 20px;
                 padding: 0 40px;
             }
             .sig-box {
@@ -206,9 +273,17 @@ if ($print_cert_id > 0) {
                     <div class="corner-ornament bottom-left"></div>
                     <div class="corner-ornament bottom-right"></div>
                     
-                    <div class="header-logo">
-                        <img src="../assets/images/logo.jpg" alt="Logo" style="height: 45px;">
-                        <div class="school-name">MI Al-Adzkiya Jakarta</div>
+                    <div class="kop-surat-cert">
+                        <div class="kop-logo-cert">
+                            <img src="../assets/images/logo.jpg" alt="Logo">
+                        </div>
+                        <div class="kop-text-cert">
+                            <h2>YAYASAN AL-BAROROH BLUBUR LIMBANGAN</h2>
+                            <h1>MADRASAH IBTIDAIYAH (MI) AL-ADZKIYA</h1>
+                            <h3>STATUS <u>TERAKREDITASI : B</u></h3>
+                            <p>Kp. Cicadas RT.02 RW.08 Desa Pasirwaru Kec. Bl. Limbangan Garut 44186</p>
+                            <p class="email">email : <a href="mailto:mi.aladzkiya@yahoo.com">mi.aladzkiya@yahoo.com</a></p>
+                        </div>
                     </div>
                     
                     <div class="cert-title">SERTIFIKAT TAHFIDZ</div>
@@ -224,7 +299,21 @@ if ($print_cert_id > 0) {
                         </strong>
                         dengan predikat kelancaran kelulusan:
                         <br>
-                        <span class="predikat-badge"><?php echo htmlspecialchars($cert['predikat']); ?></span>
+                        <?php
+                        $predikat_label = htmlspecialchars($cert['predikat']);
+                        if ($predikat_label === 'Sangat Lancar') {
+                            $predikat_display = 'Sangat Lancar (A+, A, A-)';
+                        } elseif ($predikat_label === 'Lancar Terbata-Bata') {
+                            $predikat_display = 'Lancar Terbata-Bata (B+, B, B-)';
+                        } elseif ($predikat_label === 'Lancar dengan Bantuan') {
+                            $predikat_display = 'Lancar dengan Bantuan (C+, C, C-)';
+                        } elseif ($predikat_label === 'Tidak Lancar / Ulangi') {
+                            $predikat_display = 'Tidak Lancar / Ulangi (D)';
+                        } else {
+                            $predikat_display = $predikat_label;
+                        }
+                        ?>
+                        <span class="predikat-badge"><?php echo $predikat_display; ?></span>
                     </div>
                     
                     <div class="signature-section">
@@ -232,13 +321,13 @@ if ($print_cert_id > 0) {
                             <p>Mengetahui,</p>
                             <p style="font-weight: 600; margin-top:-5px;">Kepala Madrasah</p>
                             <div class="sig-space"></div>
-                            <p><strong>H. Mohammad Syafi'i, M.Pd</strong><br>NIP. 197805122005041001</p>
+                            <p><strong><?php echo htmlspecialchars(!empty($cert['nama_kepsek']) ? $cert['nama_kepsek'] : "H. Mohammad Syafi'i, M.Pd"); ?></strong><br>NIP. <?php echo htmlspecialchars(!empty($cert['nip_kepsek']) ? $cert['nip_kepsek'] : "197805122005041001"); ?></p>
                         </div>
                         <div class="sig-box">
                             <p>Jakarta, <?php echo date('d M Y', strtotime($cert['tanggal_lulus'])); ?></p>
                             <p style="font-weight: 600; margin-top:-5px;">Guru Pembimbing Tahfidz</p>
                             <div class="sig-space"></div>
-                            <p><strong><u><?php echo htmlspecialchars($cert['nama_guru']); ?></u></strong><br>NIP. <?php echo htmlspecialchars($cert['nip_guru'] ?? '-'); ?></p>
+                            <p><strong><u><?php echo htmlspecialchars(!empty($cert['nama_guru_ttd']) ? $cert['nama_guru_ttd'] : $cert['nama_guru']); ?></u></strong><br>NIP. <?php echo htmlspecialchars(!empty($cert['nip_guru_ttd']) ? $cert['nip_guru_ttd'] : ($cert['nip_guru'] ?? '-')); ?></p>
                         </div>
                     </div>
                 </div>
@@ -367,7 +456,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_sertifikat']))
     $juz_dihafal = trim($_POST['juz_dihafal'] ?? '');
     $tanggal_lulus = $_POST['tanggal_lulus'] ?? date('Y-m-d');
     $no_sertifikat = trim($_POST['no_sertifikat'] ?? '');
-    $predikat = trim($_POST['predikat'] ?? 'Mumtaz');
+    $predikat = trim($_POST['predikat'] ?? 'Sangat Lancar');
+    $nama_kepsek = trim($_POST['nama_kepsek'] ?? '');
+    $nip_kepsek = trim($_POST['nip_kepsek'] ?? '');
+    $nama_guru_ttd = trim($_POST['nama_guru_ttd'] ?? '');
+    $nip_guru_ttd = trim($_POST['nip_guru_ttd'] ?? '');
     
     if ($siswa_id <= 0) {
         $error = 'Silakan pilih siswa.';
@@ -384,8 +477,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_sertifikat']))
                 $error = 'Nomor sertifikat tersebut sudah terdaftar di sistem. Silakan buat nomor unik lain.';
             } else {
                 $stmt_in = $pdo->prepare("
-                    INSERT INTO sertifikat (siswa_id, guru_id, juz_dihafal, tanggal_lulus, no_sertifikat, predikat)
-                    VALUES (:siswa_id, :guru_id, :juz, :tgl, :no, :pred)
+                    INSERT INTO sertifikat (siswa_id, guru_id, juz_dihafal, tanggal_lulus, no_sertifikat, predikat, nama_kepsek, nip_kepsek, nama_guru_ttd, nip_guru_ttd)
+                    VALUES (:siswa_id, :guru_id, :juz, :tgl, :no, :pred, :nama_kepsek, :nip_kepsek, :nama_guru_ttd, :nip_guru_ttd)
                 ");
                 $stmt_in->execute([
                     'siswa_id' => $siswa_id,
@@ -393,7 +486,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_sertifikat']))
                     'juz' => $juz_dihafal,
                     'tgl' => $tanggal_lulus,
                     'no' => $no_sertifikat,
-                    'pred' => $predikat
+                    'pred' => $predikat,
+                    'nama_kepsek' => $nama_kepsek,
+                    'nip_kepsek' => $nip_kepsek,
+                    'nama_guru_ttd' => $nama_guru_ttd,
+                    'nip_guru_ttd' => $nip_guru_ttd
                 ]);
                 
                 $stmt_name = $pdo->prepare("SELECT nama_lengkap FROM siswa WHERE id = :id");
@@ -495,7 +592,11 @@ try {
             <form action="sertifikat.php" method="POST">
                 <div class="form-group">
                     <label class="form-label" for="siswa_id">Siswa Penerima</label>
-                    <select name="siswa_id" class="form-control form-control-select" style="padding-left: 16px;" required>
+                    <div style="margin-bottom: 8px; position: relative;">
+                        <i class="fa-solid fa-magnifying-glass input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px;"></i>
+                        <input type="text" id="search_siswa_cert" onkeyup="filterSiswaCert()" placeholder="Ketik nama siswa..." class="form-control" style="font-size: 13px; padding: 8px 12px 8px 35px; border-radius: 8px; border: 1.5px solid #e2e8f0; width: 100%;">
+                    </div>
+                    <select name="siswa_id" id="siswa_select_cert" class="form-control form-control-select" style="padding-left: 16px;" required>
                         <option value="">-- Pilih Siswa --</option>
                         <?php foreach ($siswa_list as $siswa): ?>
                             <option value="<?php echo $siswa['id']; ?>">
@@ -529,21 +630,42 @@ try {
                     <div>
                         <label class="form-label" for="predikat">Predikat Kelulusan</label>
                         <select name="predikat" class="form-control form-control-select" style="padding-left: 16px;" required>
-                            <option value="Mumtaz">Mumtaz (Istimewa)</option>
-                            <option value="Jayyid Jiddan">Jayyid Jiddan (Sangat Baik)</option>
-                            <option value="Jayyid">Jayyid (Baik)</option>
-                            <option value="Maqbul">Maqbul (Cukup)</option>
+                            <option value="Sangat Lancar">Sangat Lancar</option>
+                            <option value="Lancar Terbata-Bata">Lancar Terbata-Bata</option>
+                            <option value="Lancar dengan Bantuan">Lancar dengan Bantuan</option>
+                            <option value="Tidak Lancar / Ulangi">Tidak Lancar / Ulangi</option>
                         </select>
                     </div>
                     <div>
                         <label class="form-label" for="tanggal_lulus">Tanggal Ujian / Lulus</label>
-                        <input type="date" name="tanggal_lulus" class="form-control" style="padding-left: 16px;" value="<?php echo date('Y-m-d'); ?>" required>
+                        <input type="date" id="tanggal_lulus" name="tanggal_lulus" class="form-control" style="padding-left: 16px;" value="<?php echo date('Y-m-d'); ?>" required>
                     </div>
                 </div>
                 
-                <button type="submit" name="submit_sertifikat" class="btn btn-primary" style="margin-top: 10px;">
-                    <i class="fa-solid fa-award"></i> Terbitkan Sertifikat
-                </button>
+                <div style="border-top: 1px dashed rgba(13, 92, 52, 0.15); padding-top: 15px; margin-top: 15px;">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" for="nama_kepsek">Nama Kepala Madrasah (TTD)</label>
+                        <input type="text" name="nama_kepsek" class="form-control" style="padding-left: 16px;" value="H. Mohammad Syafi&#039;i, M.Pd" autocomplete="off" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" for="nip_kepsek">NIP Kepala Madrasah</label>
+                        <input type="text" name="nip_kepsek" class="form-control" style="padding-left: 16px;" value="197805122005041001" autocomplete="off" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" for="nama_guru_ttd">Nama Guru Tahfidz (TTD)</label>
+                        <input type="text" name="nama_guru_ttd" class="form-control" style="padding-left: 16px;" value="<?php echo htmlspecialchars($guru_profile['nama_lengkap']); ?>" autocomplete="off" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" for="nip_guru_ttd">NIP Guru Tahfidz</label>
+                        <input type="text" name="nip_guru_ttd" class="form-control" style="padding-left: 16px;" value="<?php echo htmlspecialchars($guru_profile['nip'] ?? ''); ?>" autocomplete="off">
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: center; margin-top: 15px;">
+                    <button type="submit" name="submit_sertifikat" class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 13px;">
+                        <i class="fa-solid fa-award" style="margin-right: 5px;"></i> Terbitkan Sertifikat
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -613,5 +735,149 @@ try {
 </main>
 </div>
 </div>
+<script>
+function initDropdownDatePicker(input, minYear, maxYear) {
+    if (!input) return;
+    
+    // Create dropdowns container
+    const container = document.createElement('div');
+    container.className = 'date-dropdown-group';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = '1fr 1.3fr 1fr';
+    container.style.gap = '8px';
+    container.style.marginTop = '4px';
+    
+    // Create selects
+    const selectDay = document.createElement('select');
+    selectDay.className = 'form-control form-control-select';
+    selectDay.style.padding = '8px';
+    selectDay.innerHTML = '<option value="">Hari</option>';
+    for (let d = 1; d <= 31; d++) {
+        const val = String(d).padStart(2, '0');
+        selectDay.innerHTML += `<option value="${val}">${d}</option>`;
+    }
+    
+    const selectMonth = document.createElement('select');
+    selectMonth.className = 'form-control form-control-select';
+    selectMonth.style.padding = '8px';
+    selectMonth.innerHTML = '<option value="">Bulan</option>';
+    const months = [
+        {val: '01', name: 'Januari'}, {val: '02', name: 'Februari'}, {val: '03', name: 'Maret'},
+        {val: '04', name: 'April'}, {val: '05', name: 'Mei'}, {val: '06', name: 'Juni'},
+        {val: '07', name: 'Juli'}, {val: '08', name: 'Agustus'}, {val: '09', name: 'September'},
+        {val: '10', name: 'Oktober'}, {val: '11', name: 'November'}, {val: '12', name: 'Desember'}
+    ];
+    months.forEach(m => {
+        selectMonth.innerHTML += `<option value="${m.val}">${m.name}</option>`;
+    });
+    
+    const selectYear = document.createElement('select');
+    selectYear.className = 'form-control form-control-select';
+    selectYear.style.padding = '8px';
+    selectYear.innerHTML = '<option value="">Tahun</option>';
+    for (let y = maxYear; y >= minYear; y--) {
+        selectYear.innerHTML += `<option value="${y}">${y}</option>`;
+    }
+    
+    container.appendChild(selectDay);
+    container.appendChild(selectMonth);
+    container.appendChild(selectYear);
+    
+    // Insert container after input
+    input.parentNode.insertBefore(container, input.nextSibling);
+    // Hide the original date input
+    input.type = 'hidden';
+    
+    // Update original input value from dropdowns
+    function updateInputValue() {
+        const d = selectDay.value;
+        const m = selectMonth.value;
+        const y = selectYear.value;
+        if (d && m && y) {
+            input.value = `${y}-${m}-${d}`;
+        } else {
+            input.value = '';
+        }
+        // Trigger change event on input
+        const event = new Event('change', { bubbles: true });
+        input.dispatchEvent(event);
+    }
+    
+    selectDay.addEventListener('change', updateInputValue);
+    selectMonth.addEventListener('change', updateInputValue);
+    selectYear.addEventListener('change', updateInputValue);
+    
+    // Parse value YYYY-MM-DD and set dropdowns
+    function setDropdownsFromValue(val) {
+        if (val && val.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            const parts = val.split('-');
+            selectYear.value = parts[0];
+            selectMonth.value = parts[1];
+            selectDay.value = parts[2];
+        } else {
+            selectYear.value = '';
+            selectMonth.value = '';
+            selectDay.value = '';
+        }
+    }
+    
+    // Initial set
+    setDropdownsFromValue(input.value);
+    
+    // Intercept programmatical value assignment
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    Object.defineProperty(input, 'value', {
+        get: function() {
+            return descriptor.get.call(this);
+        },
+        set: function(val) {
+            descriptor.set.call(this, val);
+            setDropdownsFromValue(val);
+        }
+    });
+}
+
+// Instantiate for tanggal_lulus input
+const currentYear = new Date().getFullYear();
+initDropdownDatePicker(document.getElementById('tanggal_lulus'), currentYear - 5, currentYear + 5);
+// Script Pencarian Siswa Sertifikat dan Dropdown robust
+let allCertSiswaOptions = [];
+document.addEventListener("DOMContentLoaded", function() {
+    var select = document.getElementById('siswa_select_cert');
+    if (select) {
+        var options = select.options;
+        for (var i = 0; i < options.length; i++) {
+            var opt = options[i];
+            if (opt.value !== "") {
+                allCertSiswaOptions.push({
+                    value: opt.value,
+                    text: opt.text
+                });
+            }
+        }
+    }
+    filterSiswaCert();
+});
+
+function filterSiswaCert() {
+    var searchVal = document.getElementById('search_siswa_cert').value.toLowerCase();
+    var select = document.getElementById('siswa_select_cert');
+    if (!select) return;
+    var prevVal = select.value;
+    select.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+    for (var i = 0; i < allCertSiswaOptions.length; i++) {
+        var optData = allCertSiswaOptions[i];
+        if (optData.text.toLowerCase().includes(searchVal)) {
+            var opt = document.createElement('option');
+            opt.value = optData.value;
+            opt.text = optData.text;
+            if (optData.value === prevVal) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        }
+    }
+}
+</script>
 </body>
 </html>

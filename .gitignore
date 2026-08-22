@@ -1,0 +1,5 @@
+update_pass.sql
+.vscode/
+.idea/
+.DS_Store
+*.log

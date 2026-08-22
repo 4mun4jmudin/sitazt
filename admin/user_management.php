@@ -205,6 +205,9 @@ try {
         <i class="fa-solid fa-circle-check"></i>
         <div><?php echo htmlspecialchars($success); ?></div>
     </div>
+    <script>
+        alert("Pemberitahuan: <?php echo htmlspecialchars($success); ?>");
+    </script>
 <?php endif; ?>
 
 <!-- Tabel Data -->
@@ -243,11 +246,18 @@ try {
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button onclick="showResetModal(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['username']); ?>')" class="btn btn-primary btn-sm" style="background-color: #ca8a04; padding: 4px 8px; font-size: 11px;">
+                                <button class="btn btn-primary btn-sm btn-reset-sandi" 
+                                        style="background-color: #ca8a04; padding: 4px 8px; font-size: 11px;"
+                                        data-id="<?php echo $u['id']; ?>"
+                                        data-username="<?php echo htmlspecialchars($u['username'], ENT_QUOTES); ?>">
                                     <i class="fa-solid fa-key"></i> Reset Sandi
                                 </button>
                                 
-                                <button onclick="showEditModal(<?php echo $u['id']; ?>, '<?php echo htmlspecialchars($u['nama_lengkap']); ?>', '<?php echo htmlspecialchars($u['email']); ?>')" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;">
+                                <button class="btn btn-secondary btn-sm btn-edit-user" 
+                                        style="padding: 4px 8px; font-size: 11px;"
+                                        data-id="<?php echo $u['id']; ?>"
+                                        data-nama="<?php echo htmlspecialchars($u['nama_lengkap'], ENT_QUOTES); ?>"
+                                        data-email="<?php echo htmlspecialchars($u['email'] ?? '', ENT_QUOTES); ?>">
                                     <i class="fa-solid fa-user-pen"></i> Edit
                                 </button>
                                 
@@ -400,6 +410,27 @@ function showEditModal(id, nama, email) {
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('show');
 }
+
+// Delegasi event listener untuk menangani klik Reset secara aman
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-reset-sandi');
+    if (btn) {
+        const id = btn.getAttribute('data-id');
+        const username = btn.getAttribute('data-username');
+        showResetModal(id, username);
+    }
+});
+
+// Delegasi event listener untuk menangani klik Edit secara aman
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-edit-user');
+    if (btn) {
+        const id = btn.getAttribute('data-id');
+        const nama = btn.getAttribute('data-nama');
+        const email = btn.getAttribute('data-email');
+        showEditModal(id, nama, email);
+    }
+});
 </script>
 
 </main>
